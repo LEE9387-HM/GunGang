@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "import": "tsx --env-file=.env scripts/run-import.ts"
+    "import": "tsx --env-file=.env scripts/run-import.ts",
+    "verify": "tsx --env-file=.env scripts/run-verify.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.0",
