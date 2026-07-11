@@ -1,0 +1,20 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# node / next (Phase 1 이후)
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# python
+__pycache__/
+*.pyc
+
+# misc
+.DS_Store
+*.log
+.vercel
