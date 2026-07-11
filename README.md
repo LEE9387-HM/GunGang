@@ -16,6 +16,15 @@ npm run build      # 프로덕션 빌드
 python scripts/verify_data_sources.py  # 식약처 API 검증 (.env 필요)
 ```
 
+## API 인증키 발급 (.env)
+
+`.env.example`을 `.env`로 복사한 뒤 두 키를 채운다. 두 포털은 별개 시스템이다.
+
+1. **DATA_GO_KR_API_KEY** — [공공데이터포털](https://www.data.go.kr) 가입 → 건강기능식품정보(15056760) "활용신청"(자동승인) → 마이페이지 > 활용신청 상세의 "일반 인증키 (Decoding)"
+2. **FOODSAFETY_API_KEY** — [식품안전나라](https://www.foodsafetykorea.go.kr) 가입 → 공공데이터 활용 메뉴에서 I2710·C003 등 필요한 서비스 체크 → "Open-API 이용신청"(자동승인) → **마이페이지 > 인증키 관리**에서 키 확인. 서비스별로 이용신청을 해야 그 서비스에 키가 활성화된다.
+
+주의: 식품안전나라 OpenAPI는 서버 불안정 시 **09:00~19:00 이용 제한** 공지가 뜰 수 있다 (ERROR-500). 수집 배치는 야간 실행 기준으로 설계한다.
+
 ## 구조 (요약 — 상세는 볼트 docs/02-architecture.md)
 
 ```
