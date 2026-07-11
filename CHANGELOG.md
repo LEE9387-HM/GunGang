@@ -6,11 +6,18 @@
 
 ### Added
 - BASE_STANDARD(기준규격) 텍스트 함량 파서 (`src/ingestion`)
+- Import 파이프라인 (`npm run import`): HtfsInfoService03 수집 → 원문 보존 →
+  파서 → product/product_ingredient staging 적재. 2,920개 제품·3,499개 성분 적재
+- 원료 일일섭취량 규칙·주의사항 시드 (draft)
 - gstack 스킬 라우팅 규칙 (CLAUDE.md)
 - README 식약처 API 인증키 발급 안내
 
 ### Changed
 - CI: actions/checkout, setup-node v4 → v5
+
+### Known Issues
+- 복합제품(오메가3+비타민D 등)에서 파서가 한 성분만 잡으면 카테고리가
+  그 성분 쪽으로 분류됨. staging 검수로 교정 예정
 
 ## [0.1.0] - 2026-07-11
 
