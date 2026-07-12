@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "import": "tsx --env-file=.env scripts/run-import.ts",
-    "verify": "tsx --env-file=.env scripts/run-verify.ts"
+    "verify": "tsx --env-file=.env scripts/run-verify.ts",
+    "price": "tsx --env-file=.env scripts/add-price.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.0",

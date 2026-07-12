@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Disclaimer } from "@/components/Disclaimer";
-import { getProductDetail, type ProductIngredientView } from "@/server/services/product-service";
+import {
+  getProductDetail,
+  getProductPricing,
+  type ProductIngredientView,
+} from "@/server/services/product-service";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +28,14 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const p = await getProductDetail(id);
   if (!p) notFound();
+
+  const key = p.ingredients.find((i) => i.isKeyFunctional);
+  const pricing = await getProductPricing(
+    p.id,
+    key?.amountNormalized ?? null,
+    key?.unitNormalized ?? null,
+    p.intakeMethod,
+  );
 
   return (
     <main className="mx-auto max-w-2xl px-5 py-10">
@@ -64,6 +76,42 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               </li>
             ))}
         </ul>
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-sm font-semibold text-gray-500">가격 · 가성비</h2>
+        {pricing ? (
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+              <p className="text-xs text-gray-500">1일 비용</p>
+              <p className="mt-1 text-lg font-bold tabular-nums">
+                {pricing.dailyCostKrw.toLocaleString()}원
+              </p>
+              <p className="mt-0.5 text-xs text-gray-400">{pricing.intakeDays}일분 기준</p>
+            </div>
+            <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+              <p className="text-xs text-gray-500">
+                {key?.ingredientName} {pricing.costPer.per}
+                {pricing.costPer.unit}당
+              </p>
+              <p className="mt-1 text-lg font-bold tabular-nums">
+                {pricing.costPer.value.toLocaleString()}원
+              </p>
+              <p className="mt-0.5 text-xs text-gray-400">
+                {pricing.retailer ?? "판매처"} ·{" "}
+                {new Date(pricing.collectedAt).toLocaleDateString("ko-KR", {
+                  timeZone: "Asia/Seoul",
+                })}{" "}
+                수집
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-2 text-xs text-gray-400">
+            가격 정보 준비 중입니다. (수집된 가격이 등록되면 1일 비용과 성분 단위당 가격이
+            표시됩니다.)
+          </p>
+        )}
       </section>
 
       <section className="mt-6 rounded-lg bg-gray-50 px-4 py-3 text-xs text-gray-600 dark:bg-gray-900 dark:text-gray-400">

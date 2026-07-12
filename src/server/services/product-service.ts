@@ -1,4 +1,6 @@
 import { createPublicClient } from "../../infra/db/public-client";
+import { parseServing } from "../../domain/dosage";
+import { dailyCostKrw, costPerAmountKrw, totalIntakeDays } from "../../domain/pricing";
 
 /** 카테고리 slug → 표시명 (검증 MVP 범위) */
 export const CATEGORY_NAMES: Record<string, string> = {
@@ -158,6 +160,78 @@ export async function getCategoryRanking(
       unit: r.unit_normalized ?? unit,
     };
   });
+}
+
+export interface ProductPricing {
+  priceKrw: number; // 배송비 포함 총액
+  intakeDays: number; // 총 섭취일수
+  dailyCostKrw: number; // 1일 비용
+  costPer: { per: number; unit: string; value: number }; // per(예:100)단위당 value원
+  retailer: string | null;
+  collectedAt: string;
+}
+
+/**
+ * 제품의 가성비 계산 (1일 비용 + 핵심성분 단위당 가격).
+ * 가격(price_entry)·포장수(variant)·섭취방법(serving) 중 하나라도 없으면 null → 화면에서 "준비 중".
+ * @param dailyAmount 핵심 성분의 1일 함량(정규화값), amountUnit 그 단위
+ * @param intakeMethod 제품 SRV_USE 텍스트
+ */
+export async function getProductPricing(
+  productId: string,
+  dailyAmount: number | null,
+  amountUnit: string | null,
+  intakeMethod: string | null,
+): Promise<ProductPricing | null> {
+  const serving = parseServing(intakeMethod);
+  if (!serving || dailyAmount == null || !amountUnit) return null;
+
+  const sb = createPublicClient();
+  const { data, error } = await sb
+    .from("product_variant")
+    .select("total_units, price_entry(price_krw, shipping_krw, collected_at, retailer:retailer_id(name))")
+    .eq("product_id", productId);
+  if (error || !data?.length) return null;
+
+  // 가격이 있는 variant 중, 가장 최근 수집가를 사용
+  let best: { totalUnits: number; price: number; shipping: number; collectedAt: string; retailer: string | null } | null =
+    null;
+  for (const v of data) {
+    for (const pe of (v.price_entry ?? []) as Array<{
+      price_krw: number;
+      shipping_krw: number;
+      collected_at: string;
+      retailer: { name: string } | null;
+    }>) {
+      if (!best || pe.collected_at > best.collectedAt) {
+        best = {
+          totalUnits: v.total_units,
+          price: pe.price_krw,
+          shipping: pe.shipping_krw,
+          collectedAt: pe.collected_at,
+          retailer: pe.retailer?.name ?? null,
+        };
+      }
+    }
+  }
+  if (!best) return null;
+
+  try {
+    const days = totalIntakeDays(best.totalUnits, serving);
+    const daily = dailyCostKrw({ totalPriceKrw: best.price + best.shipping, totalUnits: best.totalUnits }, serving);
+    const per = 100;
+    const value = costPerAmountKrw(daily, dailyAmount, per);
+    return {
+      priceKrw: best.price + best.shipping,
+      intakeDays: days,
+      dailyCostKrw: daily,
+      costPer: { per, unit: amountUnit, value },
+      retailer: best.retailer,
+      collectedAt: best.collectedAt,
+    };
+  } catch {
+    return null; // 섭취일수 0 등 계산 불가
+  }
 }
 
 /** 여러 제품을 비교용으로 조회 (2~4개). 존재하지 않거나 미검수 제품은 제외. */
