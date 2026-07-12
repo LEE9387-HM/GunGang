@@ -12,6 +12,7 @@ const TABS = [
   { slug: "lutein", label: "루테인" },
   { slug: "vitamin-c", label: "비타민C" },
   { slug: "zinc", label: "아연" },
+  { slug: "magnesium", label: "마그네슘" },
 ] as const;
 
 export function CategoryTabs({ current = "", sort }: { current?: string; sort?: string }) {

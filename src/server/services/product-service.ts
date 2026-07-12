@@ -16,6 +16,7 @@ export const CATEGORY_NAMES: Record<string, string> = {
   lutein: "루테인",
   "vitamin-c": "비타민C",
   zinc: "아연",
+  magnesium: "마그네슘",
 };
 
 /** 카테고리별 랭킹 기준 단위 — 같은 단위끼리만 비교해야 순위가 유효 */
@@ -26,6 +27,7 @@ export const RANKING_UNIT: Record<string, string> = {
   lutein: "mg",
   "vitamin-c": "mg",
   zinc: "mg",
+  magnesium: "mg",
 };
 
 /** 카테고리별 핵심 성분 라벨 (랭킹 기준 설명용) */
@@ -36,12 +38,14 @@ export const KEY_INGREDIENT_LABEL: Record<string, string> = {
   lutein: "루테인",
   "vitamin-c": "비타민C",
   zinc: "아연",
+  magnesium: "마그네슘",
 };
 
 /** 카테고리별 형태 필터 옵션 (form_labels 값과 일치) */
 export const CATEGORY_FORM_OPTIONS: Record<string, string[]> = {
   omega3: ["rTG", "TG", "식물성(조류)", "어류"],
   "vitamin-d": ["비타민 D3", "비타민 D2", "버섯·효모 유래"],
+  magnesium: ["산화마그네슘", "구연산마그네슘", "글리시네이트", "젖산마그네슘"],
 };
 
 export interface ProductListItem {

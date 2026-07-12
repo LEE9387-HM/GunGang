@@ -13,6 +13,7 @@ const INGREDIENT_CATEGORY: Record<string, string> = {
   lutein: "lutein",
   "vitamin-c": "vitamin-c",
   zinc: "zinc",
+  magnesium: "magnesium",
 };
 
 export interface ImportSummary {

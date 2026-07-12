@@ -40,6 +40,14 @@ const RULES: Record<string, Rule[]> = {
     { kind: "source", label: "버섯·효모 유래", pattern: /버섯|표고|효모/i },
     { kind: "source", label: "식물성", pattern: /식물성|지의|라이[켄크]/i },
   ],
+  magnesium: [
+    // 형태 = 흡수율·부작용 차이의 핵심
+    { kind: "form", label: "산화마그네슘", pattern: /산화\s*마그네슘|산화마그네슘|oxide/i },
+    { kind: "form", label: "구연산마그네슘", pattern: /구연산|시트르|citrate/i },
+    { kind: "form", label: "글리시네이트", pattern: /글리시네이트|비스글리시네이트|glycinate/i },
+    { kind: "form", label: "젖산마그네슘", pattern: /젖산\s*마그네슘|락트산|락테이트|lactate/i },
+    { kind: "form", label: "킬레이트", pattern: /킬레이트|chelate/i },
+  ],
 };
 
 /**
