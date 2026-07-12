@@ -162,6 +162,7 @@ export async function runImport(
         qualifier: ing.qualifier,
         parse_confidence: ing.parseConfidence,
         is_key_functional: ing.isKeyFunctional,
+        form_labels: ing.formLabels,
       });
       ingredientsLoaded += 1;
     }

@@ -26,12 +26,18 @@ export interface ProductListItem {
   companyName: string | null;
   categorySlug: string | null;
   categoryName: string | null;
-  keyIngredient: { name: string; amount: number | null; unit: string | null } | null;
+  keyIngredient: {
+    name: string;
+    amount: number | null;
+    unit: string | null;
+    formLabels: string[];
+  } | null;
 }
 
 export interface ProductIngredientView {
   ingredientName: string;
   ingredientSlug: string;
+  formLabels: string[];
   rawAmountText: string;
   amountNormalized: number | null;
   unitNormalized: string | null;
@@ -82,7 +88,7 @@ export async function searchProducts(opts: {
   let query = sb
     .from("product")
     .select(
-      "id, name, company:company_id(name), category:category_id(slug), product_ingredient(is_key_functional, amount_normalized, unit_normalized, ingredient:ingredient_id(slug, name))",
+      "id, name, company:company_id(name), category:category_id(slug), product_ingredient(is_key_functional, amount_normalized, unit_normalized, form_labels, ingredient:ingredient_id(slug, name))",
     )
     .order("name")
     .limit(opts.limit ?? 40);
@@ -104,7 +110,12 @@ export async function searchProducts(opts: {
       categorySlug: slug,
       categoryName: categoryName(slug),
       keyIngredient: key
-        ? { name: ing?.name ?? "", amount: key.amount_normalized, unit: key.unit_normalized }
+        ? {
+            name: ing?.name ?? "",
+            amount: key.amount_normalized,
+            unit: key.unit_normalized,
+            formLabels: key.form_labels ?? [],
+          }
         : null,
     };
   });
@@ -117,6 +128,7 @@ export interface RankedProduct {
   companyName: string | null;
   amount: number;
   unit: string;
+  formLabels: string[];
 }
 
 /**
@@ -138,7 +150,7 @@ export async function getCategoryRanking(
   const { data, error } = await sb
     .from("product_ingredient")
     .select(
-      "amount_normalized, unit_normalized, product:product_id!inner(id, name, category_id, data_status, company:company_id(name))",
+      "amount_normalized, unit_normalized, form_labels, product:product_id!inner(id, name, category_id, data_status, company:company_id(name))",
     )
     .eq("is_key_functional", true)
     .eq("unit_normalized", unit)
@@ -158,6 +170,7 @@ export async function getCategoryRanking(
       companyName: p.company?.name ?? null,
       amount: r.amount_normalized as number,
       unit: r.unit_normalized ?? unit,
+      formLabels: r.form_labels ?? [],
     };
   });
 }
@@ -247,7 +260,7 @@ export async function getProductDetail(id: string): Promise<ProductDetail | null
   const { data, error } = await sb
     .from("product")
     .select(
-      "id, name, report_no, intake_method, verified_at, source_registered_at, company:company_id(name), category:category_id(slug), product_ingredient(raw_amount_text, amount_normalized, unit_normalized, per_amount, per_unit, qualifier, parse_confidence, is_key_functional, ingredient:ingredient_id(slug, name))",
+      "id, name, report_no, intake_method, verified_at, source_registered_at, company:company_id(name), category:category_id(slug), product_ingredient(raw_amount_text, amount_normalized, unit_normalized, per_amount, per_unit, qualifier, parse_confidence, is_key_functional, form_labels, ingredient:ingredient_id(slug, name))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -262,6 +275,7 @@ export async function getProductDetail(id: string): Promise<ProductDetail | null
       return {
         ingredientName: ing?.name ?? "",
         ingredientSlug: ing?.slug ?? "",
+        formLabels: i.form_labels ?? [],
         rawAmountText: i.raw_amount_text,
         amountNormalized: i.amount_normalized,
         unitNormalized: i.unit_normalized,

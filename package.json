@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "import": "tsx --env-file=.env scripts/run-import.ts",
     "verify": "tsx --env-file=.env scripts/run-verify.ts",
-    "price": "tsx --env-file=.env scripts/add-price.ts"
+    "price": "tsx --env-file=.env scripts/add-price.ts",
+    "backfill:forms": "tsx --env-file=.env scripts/backfill-forms.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.0",

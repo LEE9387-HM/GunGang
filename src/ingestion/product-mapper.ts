@@ -6,6 +6,7 @@
  * 테스트: tests/unit/product-mapper.test.ts
  */
 import { parseBaseStandard } from "./base-standard-parser";
+import { extractIngredientForm } from "../domain/ingredient-form";
 
 /** 건강기능식품정보 API(HtfsInfoService03) 레코드 — 사용하는 필드만 */
 export interface HtfsRecord {
@@ -46,6 +47,7 @@ export interface MappedIngredient {
   qualifier: string | null;
   parseConfidence: "exact" | "loose";
   isKeyFunctional: boolean;
+  formLabels: string[];
 }
 
 export interface MappedProduct {
@@ -102,6 +104,9 @@ export function mapRecord(rec: HtfsRecord, aliases: AliasMap): MappedProduct {
       qualifier: p.qualifier,
       parseConfidence: p.confidence,
       isKeyFunctional: true, // 매칭된 성분은 우리가 추적하는 핵심 기능성 성분
+      formLabels: extractIngredientForm(match.categorySlug, name, rec.BASE_STANDARD ?? null).map(
+        (t) => t.label,
+      ),
     });
     categoryVotes.set(match.categorySlug, (categoryVotes.get(match.categorySlug) ?? 0) + 1);
   }

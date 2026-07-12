@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Disclaimer } from "@/components/Disclaimer";
+import { FormBadges } from "@/components/FormBadges";
 import {
   getProductDetail,
   getProductPricing,
@@ -72,6 +73,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                     {normalizedLine(i) ?? "미확인"}
                   </span>
                 </div>
+                {i.formLabels.length > 0 && (
+                  <div className="mt-1.5">
+                    <FormBadges labels={i.formLabels} />
+                  </div>
+                )}
                 <p className="mt-1.5 text-xs text-gray-500">표시 원문: {i.rawAmountText}</p>
               </li>
             ))}

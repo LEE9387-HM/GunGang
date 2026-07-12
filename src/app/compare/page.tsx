@@ -24,6 +24,11 @@ function keyIngredientName(p: ProductDetail): string {
   return p.ingredients.find((i) => i.isKeyFunctional)?.ingredientName ?? "-";
 }
 
+function keyForm(p: ProductDetail): string {
+  const labels = p.ingredients.find((i) => i.isKeyFunctional)?.formLabels ?? [];
+  return labels.length ? labels.join(" · ") : "표기 없음";
+}
+
 function formatDate(iso: string | null): string {
   if (!iso) return "-";
   return new Date(iso).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" });
@@ -83,6 +88,7 @@ export default async function ComparePage({
                   label="핵심 성분"
                   cells={products.map(keyIngredientName)}
                 />
+                <Row label="원료 형태" cells={products.map(keyForm)} />
                 <Row
                   label="함량"
                   cells={products.map(keyAmount)}

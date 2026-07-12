@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CategoryTabs } from "@/components/CategoryTabs";
+import { FormBadges } from "@/components/FormBadges";
 import { SearchBar } from "@/components/SearchBar";
 import {
   searchProducts,
@@ -110,7 +111,10 @@ async function Ranking({ category, categoryLabel }: { category: string; category
               <Link href={`/products/${p.id}`} className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{p.name}</p>
-                  {p.companyName && <span className="text-xs text-gray-500">{p.companyName}</span>}
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    {p.companyName && <span className="text-xs text-gray-500">{p.companyName}</span>}
+                    <FormBadges labels={p.formLabels} />
+                  </span>
                 </div>
                 <span className="shrink-0 text-sm font-semibold tabular-nums">
                   {p.amount.toLocaleString()}
@@ -162,8 +166,11 @@ async function Results({
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{p.name}</p>
-                    <span className="text-xs text-gray-500">
-                      {p.companyName ?? p.categoryName}
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-xs text-gray-500">
+                        {p.companyName ?? p.categoryName}
+                      </span>
+                      {p.keyIngredient && <FormBadges labels={p.keyIngredient.formLabels} />}
                     </span>
                   </div>
                   {p.keyIngredient && (

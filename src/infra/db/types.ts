@@ -557,6 +557,7 @@ export type Database = {
         Row: {
           amount_normalized: number | null
           conversion_id: string | null
+          form_labels: string[]
           id: string
           ingredient_id: string
           is_key_functional: boolean
@@ -571,6 +572,7 @@ export type Database = {
         Insert: {
           amount_normalized?: number | null
           conversion_id?: string | null
+          form_labels?: string[]
           id?: string
           ingredient_id: string
           is_key_functional?: boolean
@@ -585,6 +587,7 @@ export type Database = {
         Update: {
           amount_normalized?: number | null
           conversion_id?: string | null
+          form_labels?: string[]
           id?: string
           ingredient_id?: string
           is_key_functional?: boolean
