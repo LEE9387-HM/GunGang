@@ -38,8 +38,8 @@ export function autoVerifyEligibility(c: ReviewCandidate): EligibilityResult {
   const key = c.ingredients.filter((i) => i.isKeyFunctional);
   if (key.length === 0) {
     reasons.push("핵심 기능성 성분 없음");
-  } else if (c.categorySlug === "multivitamin") {
-    // 종합비타민은 다성분이 정상. exact 함량 성분이 하나라도 있으면 후보.
+  } else if (c.categorySlug === "multivitamin" || c.categorySlug === "joint") {
+    // 종합비타민·관절건강은 다성분이 정상. exact 함량 성분이 하나라도 있으면 후보.
     if (!key.some((k) => k.parseConfidence === "exact" && (k.amountNormalized ?? 0) > 0)) {
       reasons.push("exact 함량 성분 없음");
     }

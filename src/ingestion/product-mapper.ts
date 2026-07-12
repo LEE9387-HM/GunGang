@@ -113,7 +113,8 @@ export function mapRecord(rec: HtfsRecord, aliases: AliasMap): MappedProduct {
   const name = (rec.PRDUCT ?? "").trim();
   const parsed = parseBaseStandard(rec.BASE_STANDARD ?? "");
 
-  const ingredients: MappedIngredient[] = [];
+  // 매칭 성분을 성분 카테고리와 함께 모은다. is_key_functional은 카테고리 확정 후 설정.
+  const matched: Array<{ row: MappedIngredient; catSlug: string | null }> = [];
   const categoryVotes = new Map<string, number>();
   const seenIngredient = new Set<string>();
 
@@ -122,19 +123,22 @@ export function mapRecord(rec: HtfsRecord, aliases: AliasMap): MappedProduct {
     if (!match) continue; // 성분 사전 밖 성분은 스킵
     if (seenIngredient.has(match.ingredientId)) continue; // 같은 성분 중복 표기 제거 (unique 제약)
     seenIngredient.add(match.ingredientId);
-    ingredients.push({
-      ingredientId: match.ingredientId,
-      rawAmountText: p.raw,
-      amountNormalized: p.amount,
-      unitNormalized: p.unit,
-      perAmount: p.per,
-      perUnit: p.perUnit,
-      qualifier: p.qualifier,
-      parseConfidence: p.confidence,
-      isKeyFunctional: true, // 매칭된 성분은 우리가 추적하는 핵심 기능성 성분
-      formLabels: extractIngredientForm(match.categorySlug, name, rec.BASE_STANDARD ?? null).map(
-        (t) => t.label,
-      ),
+    matched.push({
+      row: {
+        ingredientId: match.ingredientId,
+        rawAmountText: p.raw,
+        amountNormalized: p.amount,
+        unitNormalized: p.unit,
+        perAmount: p.per,
+        perUnit: p.perUnit,
+        qualifier: p.qualifier,
+        parseConfidence: p.confidence,
+        isKeyFunctional: false, // 아래에서 주 카테고리 성분만 true로
+        formLabels: extractIngredientForm(match.categorySlug, name, rec.BASE_STANDARD ?? null).map(
+          (t) => t.label,
+        ),
+      },
+      catSlug: match.categorySlug,
     });
     // 자체 카테고리가 있는 성분만 투표 (종합비타민 구성원은 null → 제외)
     if (match.categorySlug) {
@@ -143,6 +147,14 @@ export function mapRecord(rec: HtfsRecord, aliases: AliasMap): MappedProduct {
   }
 
   const categorySlug = determineCategory([...categoryVotes.keys()]);
+
+  // 핵심 기능성 성분 = 제품 주 카테고리에 해당하는 성분.
+  // 종합비타민·미분류는 모든 성분을 핵심으로 본다(대표 성분이 없으므로).
+  const allKey = categorySlug === "multivitamin" || categorySlug === null;
+  for (const m of matched) {
+    m.row.isKeyFunctional = allKey || m.catSlug === categorySlug;
+  }
+  const ingredients = matched.map((m) => m.row);
 
   return {
     reportNo: rec.STTEMNT_NO?.trim() || null,
