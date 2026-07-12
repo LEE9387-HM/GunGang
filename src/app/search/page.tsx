@@ -7,6 +7,7 @@ import {
   getCategoryRanking,
   CATEGORY_NAMES,
   KEY_INGREDIENT_LABEL,
+  CATEGORY_FORM_OPTIONS,
 } from "@/server/services/product-service";
 
 export const dynamic = "force-dynamic";
@@ -30,12 +31,39 @@ function CompareButton() {
 
 const CHECKBOX = "h-4 w-4 shrink-0 accent-gray-900 dark:accent-white";
 
+function FormChip({
+  category,
+  label,
+  value,
+  active,
+}: {
+  category: string;
+  label: string;
+  value: string;
+  active: boolean;
+}) {
+  const params = new URLSearchParams({ category, sort: "amount" });
+  if (value) params.set("form", value);
+  return (
+    <Link
+      href={`/search?${params.toString()}`}
+      className={
+        active
+          ? "rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white"
+          : "rounded-full border border-gray-300 px-3 py-1 text-xs hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+      }
+    >
+      {label}
+    </Link>
+  );
+}
+
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string; sort?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; sort?: string; form?: string }>;
 }) {
-  const { q, category, sort } = await searchParams;
+  const { q, category, sort, form } = await searchParams;
   const categoryLabel = category ? (CATEGORY_NAMES[category] ?? category) : null;
   const rankingMode = !!category && sort === "amount" && !q;
 
@@ -68,7 +96,7 @@ export default async function SearchPage({
       )}
 
       {rankingMode ? (
-        <Ranking category={category!} categoryLabel={categoryLabel!} />
+        <Ranking category={category!} categoryLabel={categoryLabel!} form={form} />
       ) : (
         <Results q={q} category={category} categoryLabel={categoryLabel} />
       )}
@@ -76,19 +104,44 @@ export default async function SearchPage({
   );
 }
 
-async function Ranking({ category, categoryLabel }: { category: string; categoryLabel: string }) {
-  const ranked = await getCategoryRanking(category, 10);
+async function Ranking({
+  category,
+  categoryLabel,
+  form,
+}: {
+  category: string;
+  categoryLabel: string;
+  form?: string;
+}) {
+  const ranked = await getCategoryRanking(category, 10, form);
   const key = KEY_INGREDIENT_LABEL[category] ?? "핵심 성분";
+  const formOptions = CATEGORY_FORM_OPTIONS[category] ?? [];
 
   return (
     <section className="mt-4">
+      {/* 원료 형태 필터 */}
+      {formOptions.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          <FormChip category={category} label="전체 형태" value="" active={!form} />
+          {formOptions.map((f) => (
+            <FormChip key={f} category={category} label={f} value={f} active={form === f} />
+          ))}
+        </div>
+      )}
       <p className="text-sm text-gray-600 dark:text-gray-400">
-        <span className="font-medium">{categoryLabel}</span> · {key} 함량 높은 순 Top{" "}
+        <span className="font-medium">{categoryLabel}</span>
+        {form && <span className="font-medium"> · {form}</span>} · {key} 함량 높은 순 Top{" "}
         {ranked.length}
       </p>
       <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
         함량이 높다고 더 좋은 제품이라는 뜻은 아닙니다. 일일섭취량 기준을 함께 확인하세요.
       </p>
+
+      {ranked.length === 0 && (
+        <p className="mt-6 text-sm text-gray-500">
+          해당 형태로 표기된 제품이 없습니다. (제품명에 형태가 표기된 경우만 분류됩니다.)
+        </p>
+      )}
 
       <form action="/compare">
         <ol className="mt-4 space-y-2">

@@ -20,6 +20,12 @@ export const KEY_INGREDIENT_LABEL: Record<string, string> = {
   "vitamin-d": "비타민D",
 };
 
+/** 카테고리별 형태 필터 옵션 (form_labels 값과 일치) */
+export const CATEGORY_FORM_OPTIONS: Record<string, string[]> = {
+  omega3: ["rTG", "TG", "식물성(조류)", "어류"],
+  "vitamin-d": ["비타민 D3", "비타민 D2", "버섯·효모 유래"],
+};
+
 export interface ProductListItem {
   id: string;
   name: string;
@@ -139,6 +145,7 @@ export interface RankedProduct {
 export async function getCategoryRanking(
   category: string,
   limit = 10,
+  form?: string,
 ): Promise<RankedProduct[]> {
   const unit = RANKING_UNIT[category];
   if (!unit) return [];
@@ -147,7 +154,7 @@ export async function getCategoryRanking(
   const { data: cat } = await sb.from("category").select("id").eq("slug", category).maybeSingle();
   if (!cat) return [];
 
-  const { data, error } = await sb
+  let q = sb
     .from("product_ingredient")
     .select(
       "amount_normalized, unit_normalized, form_labels, product:product_id!inner(id, name, category_id, data_status, company:company_id(name))",
@@ -156,7 +163,9 @@ export async function getCategoryRanking(
     .eq("unit_normalized", unit)
     .not("amount_normalized", "is", null)
     .eq("product.category_id", cat.id)
-    .eq("product.data_status", "verified")
+    .eq("product.data_status", "verified");
+  if (form) q = q.contains("form_labels", [form]);
+  const { data, error } = await q
     .order("amount_normalized", { ascending: false })
     .limit(limit);
   if (error) throw new Error(`랭킹 조회 실패: ${error.message}`);
