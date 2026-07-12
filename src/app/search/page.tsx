@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CategoryTabs } from "@/components/CategoryTabs";
 import { SearchBar } from "@/components/SearchBar";
 import { searchProducts, CATEGORY_NAMES } from "@/server/services/product-service";
 
@@ -24,8 +25,9 @@ export default async function SearchPage({
         ← GunGang
       </Link>
 
-      <div className="mt-4">
-        <SearchBar defaultQ={q ?? ""} defaultCategory={category ?? ""} />
+      <div className="mt-4 space-y-3">
+        <CategoryTabs current={category ?? ""} />
+        <SearchBar defaultQ={q ?? ""} category={category ?? ""} />
       </div>
 
       <p className="mt-6 text-sm text-gray-600 dark:text-gray-400">

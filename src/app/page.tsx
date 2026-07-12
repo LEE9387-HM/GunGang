@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { CategoryTabs } from "@/components/CategoryTabs";
 import { SearchBar } from "@/components/SearchBar";
 
 export default function Home() {
@@ -10,23 +10,9 @@ export default function Home() {
         추천이 아니라 스스로 판단할 정보를 제공합니다.
       </p>
 
-      <div className="mt-8">
+      <div className="mt-8 space-y-3">
+        <CategoryTabs current="" />
         <SearchBar />
-      </div>
-
-      <div className="mt-6 flex gap-3 text-sm">
-        <Link
-          href="/search?category=omega3"
-          className="rounded-full border border-gray-300 px-4 py-1.5 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-        >
-          오메가3 둘러보기
-        </Link>
-        <Link
-          href="/search?category=vitamin-d"
-          className="rounded-full border border-gray-300 px-4 py-1.5 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-        >
-          비타민D 둘러보기
-        </Link>
       </div>
 
       <p className="mt-10 text-xs text-gray-500">
