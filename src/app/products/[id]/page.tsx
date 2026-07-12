@@ -82,6 +82,23 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               </li>
             ))}
         </ul>
+        {p.ingredients.some((i) => !i.isKeyFunctional) && (
+          <div className="mt-3">
+            <p className="text-xs text-gray-400">함께 든 성분</p>
+            <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
+              {p.ingredients
+                .filter((i) => !i.isKeyFunctional)
+                .map((i, idx) => (
+                  <li key={idx} className="tabular-nums">
+                    {i.ingredientName}
+                    {i.amountNormalized != null && i.unitNormalized
+                      ? ` ${i.amountNormalized.toLocaleString()}${i.unitNormalized}`
+                      : ""}
+                  </li>
+                ))}
+            </ul>
+          </div>
+        )}
       </section>
 
       <section className="mt-6">
