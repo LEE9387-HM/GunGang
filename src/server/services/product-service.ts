@@ -160,6 +160,13 @@ export async function getCategoryRanking(
   });
 }
 
+/** 여러 제품을 비교용으로 조회 (2~4개). 존재하지 않거나 미검수 제품은 제외. */
+export async function compareProducts(ids: string[]): Promise<ProductDetail[]> {
+  const unique = [...new Set(ids)].slice(0, 4);
+  const results = await Promise.all(unique.map((id) => getProductDetail(id)));
+  return results.filter((p): p is ProductDetail => p !== null);
+}
+
 /** 제품 상세 (성분 + 출처·기준일). verified 아니면 null. */
 export async function getProductDetail(id: string): Promise<ProductDetail | null> {
   const sb = createPublicClient();

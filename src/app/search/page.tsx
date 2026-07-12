@@ -15,6 +15,20 @@ function formatAmount(amount: number | null, unit: string | null): string {
   return `${amount.toLocaleString()}${unit}`;
 }
 
+/** 체크 후 /compare로 보내는 플로팅 버튼 */
+function CompareButton() {
+  return (
+    <button
+      type="submit"
+      className="fixed bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-gray-900 px-6 py-3 text-sm font-medium text-white shadow-lg hover:bg-gray-700 dark:bg-white dark:text-gray-900"
+    >
+      선택 비교 (2~4개)
+    </button>
+  );
+}
+
+const CHECKBOX = "h-4 w-4 shrink-0 accent-gray-900 dark:accent-white";
+
 export default async function SearchPage({
   searchParams,
 }: {
@@ -25,7 +39,7 @@ export default async function SearchPage({
   const rankingMode = !!category && sort === "amount" && !q;
 
   return (
-    <main className="mx-auto max-w-2xl px-5 py-10">
+    <main className="mx-auto max-w-2xl px-5 py-10 pb-24">
       <Link href="/" className="text-sm text-gray-500 hover:underline">
         ← GunGang
       </Link>
@@ -35,7 +49,6 @@ export default async function SearchPage({
         <SearchBar defaultQ={q ?? ""} category={category ?? ""} />
       </div>
 
-      {/* 정렬 토글 — 카테고리 선택 시에만 (함량은 같은 단위끼리만 비교 유효) */}
       {category && (
         <div className="mt-5 flex gap-4 text-sm">
           <Link
@@ -62,13 +75,7 @@ export default async function SearchPage({
   );
 }
 
-async function Ranking({
-  category,
-  categoryLabel,
-}: {
-  category: string;
-  categoryLabel: string;
-}) {
+async function Ranking({ category, categoryLabel }: { category: string; categoryLabel: string }) {
   const ranked = await getCategoryRanking(category, 10);
   const key = KEY_INGREDIENT_LABEL[category] ?? "핵심 성분";
 
@@ -82,13 +89,14 @@ async function Ranking({
         함량이 높다고 더 좋은 제품이라는 뜻은 아닙니다. 일일섭취량 기준을 함께 확인하세요.
       </p>
 
-      <ol className="mt-4 space-y-2">
-        {ranked.map((p) => (
-          <li key={p.id}>
-            <Link
-              href={`/products/${p.id}`}
-              className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-3 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900"
+      <form action="/compare">
+        <ol className="mt-4 space-y-2">
+          {ranked.map((p) => (
+            <li
+              key={p.id}
+              className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-3 dark:border-gray-800"
             >
+              <input type="checkbox" name="ids" value={p.id} className={CHECKBOX} />
               <span
                 className={
                   "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold " +
@@ -99,20 +107,21 @@ async function Ranking({
               >
                 {p.rank}
               </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{p.name}</p>
-                {p.companyName && (
-                  <span className="text-xs text-gray-500">{p.companyName}</span>
-                )}
-              </div>
-              <span className="shrink-0 text-sm font-semibold tabular-nums">
-                {p.amount.toLocaleString()}
-                {p.unit}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ol>
+              <Link href={`/products/${p.id}`} className="flex min-w-0 flex-1 items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{p.name}</p>
+                  {p.companyName && <span className="text-xs text-gray-500">{p.companyName}</span>}
+                </div>
+                <span className="shrink-0 text-sm font-semibold tabular-nums">
+                  {p.amount.toLocaleString()}
+                  {p.unit}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+        {ranked.length > 0 && <CompareButton />}
+      </form>
     </section>
   );
 }
@@ -142,31 +151,35 @@ async function Results({
           검색 결과가 없습니다. 다른 제품명이나 카테고리로 시도해 보세요.
         </p>
       ) : (
-        <ul className="mt-4 divide-y divide-gray-200 dark:divide-gray-800">
-          {results.map((p) => (
-            <li key={p.id}>
-              <Link
-                href={`/products/${p.id}`}
-                className="flex items-center justify-between gap-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-900"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{p.name}</p>
-                  <span className="text-xs text-gray-500">
-                    {p.companyName ?? p.categoryName}
-                  </span>
-                </div>
-                {p.keyIngredient && (
-                  <div className="shrink-0 text-right">
-                    <p className="text-xs text-gray-500">{p.keyIngredient.name}</p>
-                    <p className="text-sm font-semibold tabular-nums">
-                      {formatAmount(p.keyIngredient.amount, p.keyIngredient.unit)}
-                    </p>
+        <form action="/compare">
+          <ul className="mt-4 divide-y divide-gray-200 dark:divide-gray-800">
+            {results.map((p) => (
+              <li key={p.id} className="flex items-center gap-3 py-3.5">
+                <input type="checkbox" name="ids" value={p.id} className={CHECKBOX} />
+                <Link
+                  href={`/products/${p.id}`}
+                  className="flex min-w-0 flex-1 items-center justify-between gap-4"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{p.name}</p>
+                    <span className="text-xs text-gray-500">
+                      {p.companyName ?? p.categoryName}
+                    </span>
                   </div>
-                )}
-              </Link>
-            </li>
-          ))}
-        </ul>
+                  {p.keyIngredient && (
+                    <div className="shrink-0 text-right">
+                      <p className="text-xs text-gray-500">{p.keyIngredient.name}</p>
+                      <p className="text-sm font-semibold tabular-nums">
+                        {formatAmount(p.keyIngredient.amount, p.keyIngredient.unit)}
+                      </p>
+                    </div>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <CompareButton />
+        </form>
       )}
     </>
   );
