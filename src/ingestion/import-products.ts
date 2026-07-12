@@ -20,6 +20,9 @@ const INGREDIENT_CATEGORY: Record<string, string> = {
   "coenzyme-q10": "coq10",
   "saw-palmetto": "saw-palmetto",
   ginkgo: "ginkgo",
+  collagen: "collagen",
+  propolis: "propolis",
+  gla: "gla",
 };
 
 export interface ImportSummary {
@@ -40,7 +43,7 @@ function chunk<T>(arr: T[], n: number): T[][] {
 }
 
 /** ingredient + ingredient_alias 테이블에서 매칭용 별칭 맵 구축. */
-async function buildAliasMap(sb: DB): Promise<AliasMap> {
+export async function buildAliasMap(sb: DB): Promise<AliasMap> {
   const { data: ings, error: e1 } = await sb.from("ingredient").select("id, slug");
   if (e1) throw new Error(`ingredient 조회 실패: ${e1.message}`);
   const slugById = new Map(ings.map((i) => [i.id, i.slug]));

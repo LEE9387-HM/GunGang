@@ -71,6 +71,30 @@ export function normalizeLabel(label: string): string {
 }
 
 /**
+ * 부성분으로 자주 섞이는 카테고리 (비타민C·아연·마그네슘).
+ * 주기능 성분이 따로 있으면 이들은 카테고리 판정에서 무시한다.
+ * 예: 쏘팔메토(로르산)+아연 → 쏘팔메토, 콜라겐+비타민C → 콜라겐.
+ */
+const MINOR_CATEGORIES = new Set(["vitamin-c", "zinc", "magnesium"]);
+
+/**
+ * 매칭된 성분들의 카테고리 목록에서 제품 카테고리를 결정한다 (순수 함수).
+ * - 주기능(non-minor) 카테고리 2종 이상 → 종합비타민
+ * - 주기능 1종 → 그 카테고리 (부성분 미네랄 무시)
+ * - 주기능 0종, 부성분만 2종+ → 종합비타민, 1종 → 그 미네랄, 0종 → null
+ */
+export function determineCategory(categorySlugs: Array<string | null>): string | null {
+  const distinct = [...new Set(categorySlugs.filter((c): c is string => !!c))];
+  const main = distinct.filter((c) => !MINOR_CATEGORIES.has(c));
+  const minor = distinct.filter((c) => MINOR_CATEGORIES.has(c));
+  if (main.length >= 2) return "multivitamin";
+  if (main.length === 1) return main[0]!;
+  if (minor.length >= 2) return "multivitamin";
+  if (minor.length === 1) return minor[0]!;
+  return null;
+}
+
+/**
  * 별칭 맵으로 라벨을 성분에 매칭. 부분 일치(라벨이 별칭을 포함)까지 허용해
  * "EPA와 DHA의 합" 같은 변형을 흡수한다. 매칭 실패 시 null.
  */
@@ -118,15 +142,7 @@ export function mapRecord(rec: HtfsRecord, aliases: AliasMap): MappedProduct {
     }
   }
 
-  // 카테고리: 서로 다른 단일카테고리 성분이 2종 이상이면 종합비타민.
-  // 1종이면 그 카테고리, 0종이면 미분류(needs_review 아님 — 함량은 있음).
-  let categorySlug: string | null = null;
-  const distinctCategories = [...categoryVotes.keys()];
-  if (distinctCategories.length >= 2) {
-    categorySlug = "multivitamin";
-  } else if (distinctCategories.length === 1) {
-    categorySlug = distinctCategories[0]!;
-  }
+  const categorySlug = determineCategory([...categoryVotes.keys()]);
 
   return {
     reportNo: rec.STTEMNT_NO?.trim() || null,

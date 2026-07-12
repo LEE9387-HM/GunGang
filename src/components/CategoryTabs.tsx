@@ -19,6 +19,9 @@ const TABS = [
   { slug: "garcinia", label: "가르시니아" },
   { slug: "coq10", label: "코엔자임Q10" },
   { slug: "ginkgo", label: "은행잎" },
+  { slug: "saw-palmetto", label: "쏘팔메토" },
+  { slug: "propolis", label: "프로폴리스" },
+  { slug: "gla", label: "감마리놀렌산" },
 ] as const;
 
 export function CategoryTabs({ current = "", sort }: { current?: string; sort?: string }) {

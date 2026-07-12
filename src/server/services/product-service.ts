@@ -24,6 +24,9 @@ export const CATEGORY_NAMES: Record<string, string> = {
   coq10: "코엔자임Q10",
   "saw-palmetto": "쏘팔메토",
   ginkgo: "은행잎추출물",
+  collagen: "콜라겐",
+  propolis: "프로폴리스",
+  gla: "감마리놀렌산",
 };
 
 /** 카테고리별 랭킹 기준 단위 — 같은 단위끼리만 비교해야 순위가 유효.
@@ -42,6 +45,9 @@ export const RANKING_UNIT: Record<string, string> = {
   coq10: "mg",
   "saw-palmetto": "mg",
   ginkgo: "mg",
+  collagen: "mg",
+  propolis: "mg",
+  gla: "mg",
 };
 
 /** 카테고리별 핵심 성분 라벨 (랭킹 기준 설명용) */
@@ -57,8 +63,11 @@ export const KEY_INGREDIENT_LABEL: Record<string, string> = {
   "milk-thistle": "실리마린",
   garcinia: "가르시니아 HCA",
   coq10: "코엔자임Q10",
-  "saw-palmetto": "쏘팔메토 추출물",
+  "saw-palmetto": "로르산",
   ginkgo: "플라보놀배당체",
+  collagen: "콜라겐펩타이드",
+  propolis: "프로폴리스",
+  gla: "감마리놀렌산",
 };
 
 /** 카테고리별 형태 필터 옵션 (form_labels 값과 일치) */
