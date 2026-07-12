@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { Disclaimer } from "@/components/Disclaimer";
-import { compareProducts, type ProductDetail } from "@/server/services/product-service";
+import {
+  compareProducts,
+  getProductPricing,
+  type ProductDetail,
+} from "@/server/services/product-service";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +36,12 @@ export default async function ComparePage({
 }) {
   const { ids } = await searchParams;
   const products = await compareProducts(toArray(ids));
+  const pricings = await Promise.all(
+    products.map((p) => {
+      const k = p.ingredients.find((i) => i.isKeyFunctional);
+      return getProductPricing(p.id, k?.amountNormalized ?? null, k?.unitNormalized ?? null, p.intakeMethod);
+    }),
+  );
 
   return (
     <main className="mx-auto max-w-4xl px-5 py-10">
@@ -76,6 +86,19 @@ export default async function ComparePage({
                 <Row
                   label="함량"
                   cells={products.map(keyAmount)}
+                  emphasize
+                />
+                <Row
+                  label="1일 비용"
+                  cells={pricings.map((pr) =>
+                    pr ? `${pr.dailyCostKrw.toLocaleString()}원` : "준비 중",
+                  )}
+                />
+                <Row
+                  label="100단위당 가격"
+                  cells={pricings.map((pr) =>
+                    pr ? `${pr.costPer.value.toLocaleString()}원 / 100${pr.costPer.unit}` : "준비 중",
+                  )}
                   emphasize
                 />
                 <Row label="신고번호" cells={products.map((p) => p.reportNo ?? "-")} />
