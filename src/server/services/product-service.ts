@@ -21,6 +21,7 @@ export const KEY_INGREDIENT_LABEL: Record<string, string> = {
 export interface ProductListItem {
   id: string;
   name: string;
+  companyName: string | null;
   categorySlug: string | null;
   categoryName: string | null;
   keyIngredient: { name: string; amount: number | null; unit: string | null } | null;
@@ -42,6 +43,7 @@ export interface ProductIngredientView {
 export interface ProductDetail {
   id: string;
   name: string;
+  companyName: string | null;
   categorySlug: string | null;
   categoryName: string | null;
   reportNo: string | null;
@@ -78,7 +80,7 @@ export async function searchProducts(opts: {
   let query = sb
     .from("product")
     .select(
-      "id, name, category:category_id(slug), product_ingredient(is_key_functional, amount_normalized, unit_normalized, ingredient:ingredient_id(slug, name))",
+      "id, name, company:company_id(name), category:category_id(slug), product_ingredient(is_key_functional, amount_normalized, unit_normalized, ingredient:ingredient_id(slug, name))",
     )
     .order("name")
     .limit(opts.limit ?? 40);
@@ -90,25 +92,27 @@ export async function searchProducts(opts: {
   if (error) throw new Error(`검색 실패: ${error.message}`);
 
   return (data ?? []).map((p) => {
-      const slug = (p.category as { slug: string } | null)?.slug ?? null;
-      const key = (p.product_ingredient ?? []).find((i) => i.is_key_functional);
-      const ing = key?.ingredient as { name: string } | null | undefined;
-      return {
-        id: p.id,
-        name: p.name,
-        categorySlug: slug,
-        categoryName: categoryName(slug),
-        keyIngredient: key
-          ? { name: ing?.name ?? "", amount: key.amount_normalized, unit: key.unit_normalized }
-          : null,
-      };
-    });
+    const slug = (p.category as { slug: string } | null)?.slug ?? null;
+    const key = (p.product_ingredient ?? []).find((i) => i.is_key_functional);
+    const ing = key?.ingredient as { name: string } | null | undefined;
+    return {
+      id: p.id,
+      name: p.name,
+      companyName: (p.company as { name: string } | null)?.name ?? null,
+      categorySlug: slug,
+      categoryName: categoryName(slug),
+      keyIngredient: key
+        ? { name: ing?.name ?? "", amount: key.amount_normalized, unit: key.unit_normalized }
+        : null,
+    };
+  });
 }
 
 export interface RankedProduct {
   rank: number;
   id: string;
   name: string;
+  companyName: string | null;
   amount: number;
   unit: string;
 }
@@ -131,7 +135,9 @@ export async function getCategoryRanking(
 
   const { data, error } = await sb
     .from("product_ingredient")
-    .select("amount_normalized, unit_normalized, product:product_id!inner(id, name, category_id, data_status)")
+    .select(
+      "amount_normalized, unit_normalized, product:product_id!inner(id, name, category_id, data_status, company:company_id(name))",
+    )
     .eq("is_key_functional", true)
     .eq("unit_normalized", unit)
     .not("amount_normalized", "is", null)
@@ -142,11 +148,12 @@ export async function getCategoryRanking(
   if (error) throw new Error(`랭킹 조회 실패: ${error.message}`);
 
   return (data ?? []).map((r, idx) => {
-    const p = r.product as unknown as { id: string; name: string };
+    const p = r.product as unknown as { id: string; name: string; company: { name: string } | null };
     return {
       rank: idx + 1,
       id: p.id,
       name: p.name,
+      companyName: p.company?.name ?? null,
       amount: r.amount_normalized as number,
       unit: r.unit_normalized ?? unit,
     };
@@ -159,7 +166,7 @@ export async function getProductDetail(id: string): Promise<ProductDetail | null
   const { data, error } = await sb
     .from("product")
     .select(
-      "id, name, report_no, intake_method, verified_at, source_registered_at, category:category_id(slug), product_ingredient(raw_amount_text, amount_normalized, unit_normalized, per_amount, per_unit, qualifier, parse_confidence, is_key_functional, ingredient:ingredient_id(slug, name))",
+      "id, name, report_no, intake_method, verified_at, source_registered_at, company:company_id(name), category:category_id(slug), product_ingredient(raw_amount_text, amount_normalized, unit_normalized, per_amount, per_unit, qualifier, parse_confidence, is_key_functional, ingredient:ingredient_id(slug, name))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -189,6 +196,7 @@ export async function getProductDetail(id: string): Promise<ProductDetail | null
   return {
     id: data.id,
     name: data.name,
+    companyName: (data.company as { name: string } | null)?.name ?? null,
     categorySlug: slug,
     categoryName: categoryName(slug),
     reportNo: data.report_no,

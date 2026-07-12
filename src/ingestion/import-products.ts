@@ -104,10 +104,23 @@ export async function runImport(
   });
   log(`적재 대상 ${loadable.length}건 / needs_review ${needsReview}건`);
 
+  // 2.5) 업체명(company) upsert → name→id 맵
+  const companyNames = [...new Set(loadable.map((m) => m.companyName).filter((n): n is string => !!n))];
+  const companyIdByName = new Map<string, string>();
+  if (companyNames.length) {
+    const { data: comps, error: cce } = await sb
+      .from("company")
+      .upsert(companyNames.map((name) => ({ name })), { onConflict: "name" })
+      .select("id, name");
+    if (cce) errors.push(`company upsert 실패: ${cce.message}`);
+    for (const c of comps ?? []) companyIdByName.set(c.name, c.id);
+  }
+
   // 3) product 배치 upsert (report_no 기준)
   const productRows = loadable.map((m) => ({
     report_no: m.reportNo!,
     name: m.name,
+    company_id: m.companyName ? (companyIdByName.get(m.companyName) ?? null) : null,
     category_id: m.categorySlug ? (categoryIdBySlug.get(m.categorySlug) ?? null) : null,
     intake_method: m.intakeMethod,
     source_registered_at: m.sourceRegisteredAt,

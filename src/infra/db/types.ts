@@ -429,6 +429,7 @@ export type Database = {
         Row: {
           brand_id: string | null
           category_id: string | null
+          company_id: string | null
           created_at: string
           daily_serving_count: number | null
           data_status: Database["public"]["Enums"]["data_status"]
@@ -446,6 +447,7 @@ export type Database = {
         Insert: {
           brand_id?: string | null
           category_id?: string | null
+          company_id?: string | null
           created_at?: string
           daily_serving_count?: number | null
           data_status?: Database["public"]["Enums"]["data_status"]
@@ -463,6 +465,7 @@ export type Database = {
         Update: {
           brand_id?: string | null
           category_id?: string | null
+          company_id?: string | null
           created_at?: string
           daily_serving_count?: number | null
           data_status?: Database["public"]["Enums"]["data_status"]
@@ -483,6 +486,13 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brand"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
             referencedColumns: ["id"]
           },
           {

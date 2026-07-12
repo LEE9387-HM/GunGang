@@ -36,6 +36,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <span className="text-xs font-medium text-gray-500">{p.categoryName}</span>
         )}
         <h1 className="mt-1 text-xl font-bold">{p.name}</h1>
+        {p.companyName && (
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{p.companyName}</p>
+        )}
         {p.intakeMethod && (
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{p.intakeMethod}</p>
         )}

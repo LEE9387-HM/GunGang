@@ -99,7 +99,12 @@ async function Ranking({
               >
                 {p.rank}
               </span>
-              <span className="min-w-0 flex-1 truncate text-sm font-medium">{p.name}</span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{p.name}</p>
+                {p.companyName && (
+                  <span className="text-xs text-gray-500">{p.companyName}</span>
+                )}
+              </div>
               <span className="shrink-0 text-sm font-semibold tabular-nums">
                 {p.amount.toLocaleString()}
                 {p.unit}
@@ -146,9 +151,9 @@ async function Results({
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{p.name}</p>
-                  {p.categoryName && (
-                    <span className="text-xs text-gray-500">{p.categoryName}</span>
-                  )}
+                  <span className="text-xs text-gray-500">
+                    {p.companyName ?? p.categoryName}
+                  </span>
                 </div>
                 {p.keyIngredient && (
                   <div className="shrink-0 text-right">
