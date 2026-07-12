@@ -437,6 +437,7 @@ export type Database = {
           intake_method: string | null
           name: string
           report_no: string | null
+          source_registered_at: string | null
           supersedes_product_id: string | null
           units_per_serving: number | null
           updated_at: string
@@ -453,6 +454,7 @@ export type Database = {
           intake_method?: string | null
           name: string
           report_no?: string | null
+          source_registered_at?: string | null
           supersedes_product_id?: string | null
           units_per_serving?: number | null
           updated_at?: string
@@ -469,6 +471,7 @@ export type Database = {
           intake_method?: string | null
           name?: string
           report_no?: string | null
+          source_registered_at?: string | null
           supersedes_product_id?: string | null
           units_per_serving?: number | null
           updated_at?: string

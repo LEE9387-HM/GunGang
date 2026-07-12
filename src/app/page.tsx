@@ -1,9 +1,36 @@
+import Link from "next/link";
+import { SearchBar } from "@/components/SearchBar";
+
 export default function Home() {
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <h1 className="text-2xl font-bold">GunGang</h1>
-      <p className="mt-2 text-sm text-gray-600">
-        건강기능식품 성분·함량·가격 비교 서비스 — Phase 1 구축 중
+    <main className="mx-auto max-w-2xl px-5 py-16">
+      <h1 className="text-3xl font-bold tracking-tight">GunGang</h1>
+      <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+        건강기능식품의 성분·실제 함량·가격을 <strong>근거와 함께</strong> 비교합니다.
+        추천이 아니라 스스로 판단할 정보를 제공합니다.
+      </p>
+
+      <div className="mt-8">
+        <SearchBar />
+      </div>
+
+      <div className="mt-6 flex gap-3 text-sm">
+        <Link
+          href="/search?category=omega3"
+          className="rounded-full border border-gray-300 px-4 py-1.5 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+        >
+          오메가3 둘러보기
+        </Link>
+        <Link
+          href="/search?category=vitamin-d"
+          className="rounded-full border border-gray-300 px-4 py-1.5 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+        >
+          비타민D 둘러보기
+        </Link>
+      </div>
+
+      <p className="mt-10 text-xs text-gray-500">
+        데이터 출처: 식품의약품안전처 건강기능식품정보. 검수 완료된 제품만 표시됩니다.
       </p>
     </main>
   );

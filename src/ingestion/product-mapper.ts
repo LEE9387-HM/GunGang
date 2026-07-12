@@ -16,8 +16,16 @@ export interface HtfsRecord {
   MAIN_FNCTN?: string; // 주된기능성
   INTAKE_HINT1?: string; // 섭취주의사항
   BASE_STANDARD?: string; // 기준규격 (함량 원천)
+  REGIST_DT?: string; // 등록/갱신일 (YYYYMMDD) — 데이터 기준일
   PRSRV_PD?: string;
   DISTB_PD?: string;
+}
+
+/** 식약처 YYYYMMDD → ISO date(YYYY-MM-DD). 형식 안 맞으면 null. */
+export function parseRegistDate(v: string | undefined): string | null {
+  if (!v || !/^\d{8}$/.test(v.trim())) return null;
+  const s = v.trim();
+  return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
 }
 
 /** 성분 라벨 정규화 키 → ingredient 정보 (ingredient_alias에서 구축) */
@@ -48,6 +56,7 @@ export interface MappedProduct {
   intakeMethod: string | null;
   mainFunction: string | null;
   productPrecaution: string | null;
+  sourceRegisteredAt: string | null;
   ingredients: MappedIngredient[];
   /** 파서가 함량을 하나도 못 뽑은 경우 true — 호출측에서 needs_review 처리 */
   needsReview: boolean;
@@ -115,6 +124,7 @@ export function mapRecord(rec: HtfsRecord, aliases: AliasMap): MappedProduct {
     intakeMethod: rec.SRV_USE?.trim() || null,
     mainFunction: rec.MAIN_FNCTN?.trim() || null,
     productPrecaution: rec.INTAKE_HINT1?.trim() || null,
+    sourceRegisteredAt: parseRegistDate(rec.REGIST_DT),
     ingredients,
     needsReview: ingredients.length === 0,
   };

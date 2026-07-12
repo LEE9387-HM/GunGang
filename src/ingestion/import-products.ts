@@ -110,6 +110,7 @@ export async function runImport(
     name: m.name,
     category_id: m.categorySlug ? (categoryIdBySlug.get(m.categorySlug) ?? null) : null,
     intake_method: m.intakeMethod,
+    source_registered_at: m.sourceRegisteredAt,
     data_status: "staging" as const,
   }));
   const { data: upserted, error: ue } = await sb
