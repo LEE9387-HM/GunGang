@@ -17,9 +17,11 @@ export const CATEGORY_NAMES: Record<string, string> = {
   "vitamin-c": "비타민C",
   zinc: "아연",
   magnesium: "마그네슘",
+  multivitamin: "종합비타민",
 };
 
-/** 카테고리별 랭킹 기준 단위 — 같은 단위끼리만 비교해야 순위가 유효 */
+/** 카테고리별 랭킹 기준 단위 — 같은 단위끼리만 비교해야 순위가 유효.
+ *  종합비타민은 다성분이라 단일 함량 랭킹이 성립하지 않아 제외(이름순 검색만). */
 export const RANKING_UNIT: Record<string, string> = {
   omega3: "mg",
   "vitamin-d": "μg",

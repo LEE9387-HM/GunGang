@@ -33,7 +33,8 @@ export function parseRegistDate(v: string | undefined): string | null {
 export interface AliasEntry {
   ingredientId: string;
   ingredientSlug: string;
-  categorySlug: string; // 이 성분의 대표 카테고리 (vitamin-d → vitamin-d, epa-dha → omega3)
+  /** 이 성분의 대표 카테고리. 종합비타민 구성원(비타민A·B군 등)은 자체 카테고리가 없어 null */
+  categorySlug: string | null;
 }
 export type AliasMap = Map<string, AliasEntry>;
 
@@ -111,17 +112,20 @@ export function mapRecord(rec: HtfsRecord, aliases: AliasMap): MappedProduct {
         (t) => t.label,
       ),
     });
-    categoryVotes.set(match.categorySlug, (categoryVotes.get(match.categorySlug) ?? 0) + 1);
+    // 자체 카테고리가 있는 성분만 투표 (종합비타민 구성원은 null → 제외)
+    if (match.categorySlug) {
+      categoryVotes.set(match.categorySlug, (categoryVotes.get(match.categorySlug) ?? 0) + 1);
+    }
   }
 
-  // 카테고리: 매칭 성분이 가장 많은 카테고리 (동수면 첫 매칭 우선)
+  // 카테고리: 서로 다른 단일카테고리 성분이 2종 이상이면 종합비타민.
+  // 1종이면 그 카테고리, 0종이면 미분류(needs_review 아님 — 함량은 있음).
   let categorySlug: string | null = null;
-  let best = 0;
-  for (const [slug, votes] of categoryVotes) {
-    if (votes > best) {
-      best = votes;
-      categorySlug = slug;
-    }
+  const distinctCategories = [...categoryVotes.keys()];
+  if (distinctCategories.length >= 2) {
+    categorySlug = "multivitamin";
+  } else if (distinctCategories.length === 1) {
+    categorySlug = distinctCategories[0]!;
   }
 
   return {

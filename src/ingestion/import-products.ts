@@ -51,7 +51,7 @@ async function buildAliasMap(sb: DB): Promise<AliasMap> {
     const entry: AliasEntry = {
       ingredientId: a.ingredient_id,
       ingredientSlug: slug,
-      categorySlug: INGREDIENT_CATEGORY[slug] ?? slug,
+      categorySlug: INGREDIENT_CATEGORY[slug] ?? null, // 매핑 없는 성분(종합비타민 구성원)은 null
     };
     map.set(a.alias_normalized, entry);
   }
