@@ -27,6 +27,8 @@ const TABS = [
   { slug: "theanine", label: "테아닌" },
   { slug: "phosphatidylserine", label: "포스파티딜세린" },
   { slug: "curcumin", label: "강황/커큐민" },
+  { slug: "soy-isoflavone", label: "대두이소플라본" },
+  { slug: "cranberry", label: "크랜베리" },
 ] as const;
 
 export function CategoryTabs({ current = "", sort }: { current?: string; sort?: string }) {
