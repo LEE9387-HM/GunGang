@@ -30,6 +30,11 @@ const INGREDIENT_CATEGORY: Record<string, string> = {
   "l-arginine": "arginine",
   cranberry: "cranberry",
   "hyaluronic-acid": "hyaluronic-acid",
+  theanine: "theanine",
+  gaba: "gaba",
+  phosphatidylserine: "phosphatidylserine",
+  "soy-isoflavone": "soy-isoflavone",
+  curcumin: "curcumin",
 };
 
 export interface ImportSummary {

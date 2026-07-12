@@ -24,6 +24,9 @@ const TABS = [
   { slug: "gla", label: "감마리놀렌산" },
   { slug: "joint", label: "관절건강" },
   { slug: "hyaluronic-acid", label: "히알루론산" },
+  { slug: "theanine", label: "테아닌" },
+  { slug: "phosphatidylserine", label: "포스파티딜세린" },
+  { slug: "curcumin", label: "강황/커큐민" },
 ] as const;
 
 export function CategoryTabs({ current = "", sort }: { current?: string; sort?: string }) {
