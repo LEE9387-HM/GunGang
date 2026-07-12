@@ -6,6 +6,18 @@ export const CATEGORY_NAMES: Record<string, string> = {
   "vitamin-d": "비타민D",
 };
 
+/** 카테고리별 랭킹 기준 단위 — 같은 단위끼리만 비교해야 순위가 유효 */
+export const RANKING_UNIT: Record<string, string> = {
+  omega3: "mg",
+  "vitamin-d": "μg",
+};
+
+/** 카테고리별 핵심 성분 라벨 (랭킹 기준 설명용) */
+export const KEY_INGREDIENT_LABEL: Record<string, string> = {
+  omega3: "EPA와 DHA의 합",
+  "vitamin-d": "비타민D",
+};
+
 export interface ProductListItem {
   id: string;
   name: string;
@@ -91,6 +103,54 @@ export async function searchProducts(opts: {
           : null,
       };
     });
+}
+
+export interface RankedProduct {
+  rank: number;
+  id: string;
+  name: string;
+  amount: number;
+  unit: string;
+}
+
+/**
+ * 카테고리 내 핵심 성분 함량 상위 랭킹. verified만 (RLS).
+ * 대표 단위(RANKING_UNIT)로 필터해 같은 단위끼리만 비교 → 순위 왜곡 방지.
+ * 주의: 함량이 높다고 더 우수한 제품이라는 뜻이 아니다 (화면에서 기준·주의 명시).
+ */
+export async function getCategoryRanking(
+  category: string,
+  limit = 10,
+): Promise<RankedProduct[]> {
+  const unit = RANKING_UNIT[category];
+  if (!unit) return [];
+  const sb = createPublicClient();
+
+  const { data: cat } = await sb.from("category").select("id").eq("slug", category).maybeSingle();
+  if (!cat) return [];
+
+  const { data, error } = await sb
+    .from("product_ingredient")
+    .select("amount_normalized, unit_normalized, product:product_id!inner(id, name, category_id, data_status)")
+    .eq("is_key_functional", true)
+    .eq("unit_normalized", unit)
+    .not("amount_normalized", "is", null)
+    .eq("product.category_id", cat.id)
+    .eq("product.data_status", "verified")
+    .order("amount_normalized", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(`랭킹 조회 실패: ${error.message}`);
+
+  return (data ?? []).map((r, idx) => {
+    const p = r.product as unknown as { id: string; name: string };
+    return {
+      rank: idx + 1,
+      id: p.id,
+      name: p.name,
+      amount: r.amount_normalized as number,
+      unit: r.unit_normalized ?? unit,
+    };
+  });
 }
 
 /** 제품 상세 (성분 + 출처·기준일). verified 아니면 null. */

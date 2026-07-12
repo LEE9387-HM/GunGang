@@ -17,7 +17,7 @@ export function CategoryTabs({ current = "", sort }: { current?: string; sort?: 
         const active = current === t.slug;
         const params = new URLSearchParams();
         if (t.slug) params.set("category", t.slug);
-        if (sort) params.set("sort", sort);
+        if (t.slug && sort) params.set("sort", sort); // 전체 카테고리는 함량순 무의미
         const href = params.toString() ? `/search?${params.toString()}` : "/search";
         return (
           <Link
