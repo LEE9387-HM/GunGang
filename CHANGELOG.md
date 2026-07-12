@@ -10,9 +10,14 @@
   파서 → product/product_ingredient staging 적재. 2,920개 제품·3,499개 성분 적재
 - 검수 흐름 (`npm run verify`): staging→verified 전환, admin_review·audit_log
   기록. 자동 후보 규칙(단일 핵심성분·exact·카테고리)으로 2,323건 승인
-- **공개 화면 (Phase 2)**: 홈·검색(카테고리 필터·이름검색)·제품 상세.
+- **공개 화면 (Phase 2)**: 홈·검색(카테고리 탭·이름검색)·제품 상세.
   핵심성분 정규화 함량 + 원문 병기, 출처·정보 기준일·검수일, 면책 문구.
   verified 제품만 노출 (RLS), SSR
+- **함량 Top 10 랭킹**: 카테고리별 핵심성분 함량 순위(단위 통일), 기준·주의 명시
+- **제조사(company) 표시**: ENTRPS 정규화(117개 업체), 검색·랭킹·상세·비교에 노출
+- **제품 비교(2~4개)**: 다나와식 나란히 비교표(제조사·함량·기준일 등),
+  목록 체크박스 → GET form (client JS 없음)
+- Vercel 배포: https://gun-gang.vercel.app
 - 원료 일일섭취량 규칙·주의사항 시드 (draft)
 - product.source_registered_at (식약처 등록일) — 근거 표시용
 - gstack 스킬 라우팅 규칙 (CLAUDE.md)
