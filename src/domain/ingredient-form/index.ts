@@ -25,8 +25,9 @@ interface Rule {
 
 const RULES: Record<string, Rule[]> = {
   omega3: [
-    // 제형
+    // 제형 (rTG 규칙을 먼저 두어 우선 매칭. TG는 rTG가 아닐 때만)
     { kind: "form", label: "rTG", pattern: /알티지|알티G|rTG/i },
+    { kind: "form", label: "TG", pattern: /트리글리세리드|(?<![rR])TG\s*오메가/i },
     { kind: "form", label: "EE(에틸에스터)", pattern: /에틸에스[테터]|(?<![a-z])EE(?![a-z])/i },
     // 유래
     { kind: "source", label: "식물성(조류)", pattern: /식물성|조류|알가|비건|vegan/i },

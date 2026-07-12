@@ -21,6 +21,19 @@ describe("extractIngredientForm — 오메가3", () => {
     expect(extractIngredientForm("omega3", "프리미엄 오메가3", null)).toEqual([]);
   });
 
+  it("TG오메가 → TG (rTG 아님)", () => {
+    const t = extractIngredientForm("omega3", "TG오메가3 1000", null);
+    const labels = t.map((x) => x.label);
+    expect(labels).toContain("TG");
+    expect(labels).not.toContain("rTG");
+  });
+
+  it("알티지는 rTG만, TG로 오분류 안 함", () => {
+    const labels = extractIngredientForm("omega3", "초임계 알티지오메가3", null).map((x) => x.label);
+    expect(labels).toContain("rTG");
+    expect(labels).not.toContain("TG");
+  });
+
   it("rTG + 식물성 동시", () => {
     const t = extractIngredientForm("omega3", "식물성 알티지 오메가3", null);
     const labels = t.map((x) => x.label);
