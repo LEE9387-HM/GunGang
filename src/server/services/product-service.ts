@@ -38,6 +38,29 @@ export const CATEGORY_NAMES: Record<string, string> = {
   curcumin: "강황/커큐민",
 };
 
+/** 카테고리를 기능군으로 묶음 (탭 23개가 세로로 빠지는 문제 해결). 노출 카테고리만 포함. */
+export const CATEGORY_GROUPS: Array<{ name: string; slugs: string[] }> = [
+  { name: "비타민·미네랄", slugs: ["multivitamin", "vitamin-d", "vitamin-c", "zinc", "magnesium"] },
+  { name: "오메가·지방산", slugs: ["omega3", "gla"] },
+  { name: "장·소화", slugs: ["probiotics"] },
+  { name: "관절·뼈", slugs: ["joint"] },
+  { name: "간·항산화", slugs: ["milk-thistle", "curcumin", "coq10", "propolis"] },
+  { name: "눈·피부", slugs: ["lutein", "hyaluronic-acid"] },
+  { name: "혈행·인지·수면", slugs: ["ginkgo", "theanine", "phosphatidylserine"] },
+  { name: "남성·여성·체지방", slugs: ["saw-palmetto", "soy-isoflavone", "garcinia"] },
+  { name: "면역·순환·기타", slugs: ["red-ginseng", "cranberry"] },
+];
+
+/** 함량순 랭킹(Top10)이 가능한 카테고리인지 — 단일 함량 단위가 있는 경우만. */
+export function hasRanking(slug: string): boolean {
+  return slug in RANKING_UNIT;
+}
+
+/** 카테고리 탐색 링크: 랭킹 가능하면 함량순(빠르고 요약), 아니면 이름순 검색. */
+export function categoryHref(slug: string): string {
+  return hasRanking(slug) ? `/search?category=${slug}&sort=amount` : `/search?category=${slug}`;
+}
+
 /** 카테고리별 랭킹 기준 단위 — 같은 단위끼리만 비교해야 순위가 유효.
  *  종합비타민은 다성분이라 단일 함량 랭킹이 성립하지 않아 제외(이름순 검색만). */
 export const RANKING_UNIT: Record<string, string> = {
@@ -177,7 +200,19 @@ export async function searchProducts(opts: {
     .order("name")
     .limit(opts.limit ?? 40);
 
-  if (opts.q?.trim()) query = query.ilike("name", `%${opts.q.trim()}%`);
+  const q = opts.q?.trim();
+  if (q) {
+    // 제품명 OR 제조사명 매칭. 제조사명은 부분일치(휴온스→휴온스엔·(주)휴온스 등)로 company_id를 먼저 찾는다.
+    const { data: comps } = await sb
+      .from("company")
+      .select("id")
+      .ilike("name", `%${q}%`)
+      .limit(200);
+    const companyIds = (comps ?? []).map((c) => c.id);
+    query = companyIds.length
+      ? query.or(`name.ilike.%${q}%,company_id.in.(${companyIds.join(",")})`)
+      : query.ilike("name", `%${q}%`);
+  }
   if (categoryId) query = query.eq("category_id", categoryId);
 
   const { data, error } = await query;

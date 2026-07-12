@@ -1,6 +1,11 @@
 import Link from "next/link";
-import { CategoryTabs } from "@/components/CategoryTabs";
 import { SearchBar } from "@/components/SearchBar";
+import {
+  CATEGORY_GROUPS,
+  CATEGORY_NAMES,
+  categoryHref,
+  hasRanking,
+} from "@/server/services/product-service";
 
 export default function Home() {
   return (
@@ -11,29 +16,33 @@ export default function Home() {
         추천이 아니라 스스로 판단할 정보를 제공합니다.
       </p>
 
-      <div className="mt-8 space-y-3">
-        <CategoryTabs current="" />
+      <div className="mt-8">
         <SearchBar />
+        <p className="mt-1.5 text-xs text-gray-400">제품명 또는 제조사로 검색</p>
       </div>
 
-      <section className="mt-10">
-        <h2 className="text-sm font-semibold text-gray-500">함량 Top 10</h2>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <Link
-            href="/search?category=omega3&sort=amount"
-            className="rounded-lg border border-gray-200 px-4 py-4 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900"
-          >
-            <p className="text-sm font-medium">오메가3</p>
-            <p className="mt-0.5 text-xs text-gray-500">EPA+DHA 함량 순위</p>
-          </Link>
-          <Link
-            href="/search?category=vitamin-d&sort=amount"
-            className="rounded-lg border border-gray-200 px-4 py-4 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900"
-          >
-            <p className="text-sm font-medium">비타민D</p>
-            <p className="mt-0.5 text-xs text-gray-500">비타민D 함량 순위</p>
-          </Link>
-        </div>
+      <section className="mt-8 space-y-5">
+        {CATEGORY_GROUPS.map((g) => (
+          <div key={g.name}>
+            <h2 className="text-xs font-semibold text-gray-500">{g.name}</h2>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {g.slugs.map((slug) => (
+                <Link
+                  key={slug}
+                  href={categoryHref(slug)}
+                  className="inline-flex items-center gap-1 rounded-full border border-gray-300 px-3.5 py-1.5 text-sm hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+                >
+                  {CATEGORY_NAMES[slug]}
+                  {hasRanking(slug) && (
+                    <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">
+                      Top10
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
       </section>
 
       <p className="mt-10 text-xs text-gray-500">

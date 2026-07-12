@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CategoryTabs } from "@/components/CategoryTabs";
 import { FormBadges } from "@/components/FormBadges";
 import { SearchBar } from "@/components/SearchBar";
 import {
@@ -83,13 +82,21 @@ export default async function SearchPage({
         ← GunGang
       </Link>
 
-      <div className="mt-4 space-y-3">
-        <CategoryTabs current={category ?? ""} sort={sort} />
+      <div className="mt-4">
         <SearchBar defaultQ={q ?? ""} category={category ?? ""} />
       </div>
 
+      {categoryLabel && (
+        <p className="mt-4 text-sm">
+          <span className="font-semibold">{categoryLabel}</span>
+          <Link href="/" className="ml-2 text-xs text-gray-400 hover:underline">
+            카테고리 변경
+          </Link>
+        </p>
+      )}
+
       {category && (
-        <div className="mt-5 flex gap-4 text-sm">
+        <div className="mt-3 flex gap-4 text-sm">
           <Link
             href={`/search?category=${category}`}
             className={!rankingMode ? "font-semibold" : "text-gray-500 hover:underline"}
