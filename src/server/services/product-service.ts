@@ -1,6 +1,12 @@
 import { createPublicClient } from "../../infra/db/public-client";
 import { parseServing } from "../../domain/dosage";
 import { dailyCostKrw, costPerAmountKrw, totalIntakeDays } from "../../domain/pricing";
+import {
+  analyzeSupplements,
+  type AnalysisItem,
+  type DuplicationResult,
+  type UpperLimit,
+} from "../../domain/duplication";
 
 /** 카테고리 slug → 표시명 (검증 MVP 범위) */
 export const CATEGORY_NAMES: Record<string, string> = {
@@ -261,6 +267,68 @@ export async function compareProducts(ids: string[]): Promise<ProductDetail[]> {
   const unique = [...new Set(ids)].slice(0, 4);
   const results = await Promise.all(unique.map((id) => getProductDetail(id)));
   return results.filter((p): p is ProductDetail => p !== null);
+}
+
+/**
+ * active 상태 상한 규칙만 로드 (RLS: rule_version은 active만 anon 노출).
+ * draft 규칙(공전 검증 전)은 제외 → 미검증 기준으로 잘못된 경고를 내지 않는다.
+ */
+async function loadActiveUpperLimits(): Promise<UpperLimit[]> {
+  const sb = createPublicClient();
+  const { data } = await sb
+    .from("rule_version")
+    .select("definition")
+    .eq("kind", "upper_limit")
+    .eq("status", "active");
+  const limits: UpperLimit[] = [];
+  for (const row of data ?? []) {
+    const def = row.definition as {
+      ingredientSlug?: string;
+      dailyIntake?: { max: number; unit: string };
+      warnAboveMax?: { value: number; unit: string };
+    };
+    if (!def.ingredientSlug) continue;
+    const max = def.dailyIntake ?? (def.warnAboveMax ? { max: def.warnAboveMax.value, unit: def.warnAboveMax.unit } : null);
+    if (!max) continue;
+    limits.push({
+      ingredientSlug: def.ingredientSlug,
+      maxAmount: max.max,
+      unit: max.unit,
+      message:
+        "합산량 {total}이 공개된 일일섭취량 기준({limit})을 초과합니다. 개인 상태·의약품 복용에 따라 다를 수 있으니 전문가와 상담하세요.",
+    });
+  }
+  return limits;
+}
+
+export interface SupplementAnalysis {
+  products: ProductDetail[];
+  result: DuplicationResult;
+  /** active 상한 규칙이 없어 상한 대조를 못한 경우 true */
+  limitsUnavailable: boolean;
+}
+
+/** 선택한 제품들의 중복 성분·상한 초과 분석 (비회원 가능, 2~10개). */
+export async function analyzeProducts(ids: string[]): Promise<SupplementAnalysis> {
+  const unique = [...new Set(ids)].slice(0, 10);
+  const products = (await Promise.all(unique.map((id) => getProductDetail(id)))).filter(
+    (p): p is ProductDetail => p !== null,
+  );
+  const items: AnalysisItem[] = products.map((p) => ({
+    productId: p.id,
+    productName: p.name,
+    ingredients: p.ingredients
+      .filter((i) => i.isKeyFunctional && i.amountNormalized != null && i.unitNormalized)
+      .map((i) => ({
+        ingredientSlug: i.ingredientSlug,
+        ingredientName: i.ingredientName,
+        amount: i.amountNormalized as number,
+        unit: i.unitNormalized as string,
+      })),
+  }));
+  const limits = await loadActiveUpperLimits();
+  const result = analyzeSupplements(items, limits);
+  return { products, result, limitsUnavailable: limits.length === 0 };
 }
 
 /** 제품 상세 (성분 + 출처·기준일). verified 아니면 null. */

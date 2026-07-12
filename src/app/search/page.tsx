@@ -17,15 +17,25 @@ function formatAmount(amount: number | null, unit: string | null): string {
   return `${amount.toLocaleString()}${unit}`;
 }
 
-/** 체크 후 /compare로 보내는 플로팅 버튼 */
-function CompareButton() {
+/** 체크 후 비교/중복분석으로 보내는 플로팅 버튼 (formaction으로 대상 분기, JS 불필요) */
+function SelectionActions() {
   return (
-    <button
-      type="submit"
-      className="fixed bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-gray-900 px-6 py-3 text-sm font-medium text-white shadow-lg hover:bg-gray-700 dark:bg-white dark:text-gray-900"
-    >
-      선택 비교 (2~4개)
-    </button>
+    <div className="fixed bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+      <button
+        type="submit"
+        formAction="/compare"
+        className="rounded-full bg-gray-900 px-5 py-3 text-sm font-medium text-white shadow-lg hover:bg-gray-700 dark:bg-white dark:text-gray-900"
+      >
+        선택 비교
+      </button>
+      <button
+        type="submit"
+        formAction="/analyze"
+        className="rounded-full border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-900 shadow-lg hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+      >
+        중복 분석
+      </button>
+    </div>
   );
 }
 
@@ -177,7 +187,7 @@ async function Ranking({
             </li>
           ))}
         </ol>
-        {ranked.length > 0 && <CompareButton />}
+        {ranked.length > 0 && <SelectionActions />}
       </form>
     </section>
   );
@@ -238,7 +248,7 @@ async function Results({
               </li>
             ))}
           </ul>
-          <CompareButton />
+          <SelectionActions />
         </form>
       )}
     </>
