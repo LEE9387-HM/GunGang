@@ -13,7 +13,7 @@ async function main() {
 
   const sb = createServiceClient();
   const summary = await runImport(sb, apiKey, {
-    terms: ["비타민D", "오메가", "EPA"],
+    terms: ["비타민D", "오메가", "EPA", "프로바이오틱스", "유산균", "루테인", "비타민C", "아연"],
     log: (m) => console.log(`  ${m}`),
   });
 

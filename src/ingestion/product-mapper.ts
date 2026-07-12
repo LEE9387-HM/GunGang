@@ -90,10 +90,13 @@ export function mapRecord(rec: HtfsRecord, aliases: AliasMap): MappedProduct {
 
   const ingredients: MappedIngredient[] = [];
   const categoryVotes = new Map<string, number>();
+  const seenIngredient = new Set<string>();
 
   for (const p of parsed) {
     const match = matchIngredient(p.label, aliases);
-    if (!match) continue; // MVP 범위(오메가3·비타민D) 밖 성분은 스킵
+    if (!match) continue; // 성분 사전 밖 성분은 스킵
+    if (seenIngredient.has(match.ingredientId)) continue; // 같은 성분 중복 표기 제거 (unique 제약)
+    seenIngredient.add(match.ingredientId);
     ingredients.push({
       ingredientId: match.ingredientId,
       rawAmountText: p.raw,

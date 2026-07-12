@@ -8,22 +8,34 @@ import {
   type UpperLimit,
 } from "../../domain/duplication";
 
-/** 카테고리 slug → 표시명 (검증 MVP 범위) */
+/** 카테고리 slug → 표시명 */
 export const CATEGORY_NAMES: Record<string, string> = {
   omega3: "오메가3",
   "vitamin-d": "비타민D",
+  probiotics: "프로바이오틱스",
+  lutein: "루테인",
+  "vitamin-c": "비타민C",
+  zinc: "아연",
 };
 
 /** 카테고리별 랭킹 기준 단위 — 같은 단위끼리만 비교해야 순위가 유효 */
 export const RANKING_UNIT: Record<string, string> = {
   omega3: "mg",
   "vitamin-d": "μg",
+  probiotics: "CFU",
+  lutein: "mg",
+  "vitamin-c": "mg",
+  zinc: "mg",
 };
 
 /** 카테고리별 핵심 성분 라벨 (랭킹 기준 설명용) */
 export const KEY_INGREDIENT_LABEL: Record<string, string> = {
   omega3: "EPA와 DHA의 합",
   "vitamin-d": "비타민D",
+  probiotics: "프로바이오틱스 수",
+  lutein: "루테인",
+  "vitamin-c": "비타민C",
+  zinc: "아연",
 };
 
 /** 카테고리별 형태 필터 옵션 (form_labels 값과 일치) */

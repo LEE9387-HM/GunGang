@@ -8,6 +8,10 @@ const TABS = [
   { slug: "", label: "전체" },
   { slug: "omega3", label: "오메가3" },
   { slug: "vitamin-d", label: "비타민D" },
+  { slug: "probiotics", label: "프로바이오틱스" },
+  { slug: "lutein", label: "루테인" },
+  { slug: "vitamin-c", label: "비타민C" },
+  { slug: "zinc", label: "아연" },
 ] as const;
 
 export function CategoryTabs({ current = "", sort }: { current?: string; sort?: string }) {

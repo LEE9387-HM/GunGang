@@ -5,10 +5,14 @@ import { mapRecord, type AliasEntry, type AliasMap, type HtfsRecord } from "./pr
 
 type DB = SupabaseClient<Database>;
 
-/** 성분 → 대표 카테고리 매핑 (검증 MVP 범위: 오메가3·비타민D). */
+/** 성분 → 대표 카테고리 매핑 */
 const INGREDIENT_CATEGORY: Record<string, string> = {
   "vitamin-d": "vitamin-d",
   "epa-dha": "omega3",
+  probiotics: "probiotics",
+  lutein: "lutein",
+  "vitamin-c": "vitamin-c",
+  zinc: "zinc",
 };
 
 export interface ImportSummary {
@@ -116,8 +120,19 @@ export async function runImport(
     for (const c of comps ?? []) companyIdByName.set(c.name, c.id);
   }
 
-  // 3) product 배치 upsert (report_no 기준)
-  const productRows = loadable.map((m) => ({
+  // 3) 신규 제품만 적재 — 기존 report_no는 건드리지 않는다 (검수 상태 보존).
+  //    import는 새 제품 추가용이며, 기존 제품 갱신·검수 리셋을 하지 않는다.
+  const allReportNos = loadable.map((m) => m.reportNo!).filter(Boolean);
+  const existing = new Set<string>();
+  for (const c of chunk(allReportNos, 400)) {
+    const { data: ex, error: exe } = await sb.from("product").select("report_no").in("report_no", c);
+    if (exe) throw new Error(`기존 제품 조회 실패: ${exe.message}`);
+    for (const r of ex ?? []) if (r.report_no) existing.add(r.report_no);
+  }
+  const newLoadable = loadable.filter((m) => !existing.has(m.reportNo!));
+  log(`신규 ${newLoadable.length}건 / 기존 유지 ${loadable.length - newLoadable.length}건`);
+
+  const productRows = newLoadable.map((m) => ({
     report_no: m.reportNo!,
     name: m.name,
     company_id: m.companyName ? (companyIdByName.get(m.companyName) ?? null) : null,
@@ -126,26 +141,19 @@ export async function runImport(
     source_registered_at: m.sourceRegisteredAt,
     data_status: "staging" as const,
   }));
-  const { data: upserted, error: ue } = await sb
-    .from("product")
-    .upsert(productRows, { onConflict: "report_no" })
-    .select("id, report_no");
-  if (ue || !upserted) throw new Error(`product upsert 실패: ${ue?.message}`);
-  const productIdByReportNo = new Map(upserted.map((p) => [p.report_no, p.id]));
-  log(`product ${upserted.length}건 upsert`);
-
-  // 4) 재적재 대비: 기존 product_ingredient 삭제 후 재삽입 (URL 길이 초과 방지 위해 청크)
-  const productIds = [...productIdByReportNo.values()];
-  for (const c of chunk(productIds, 200)) {
-    const { error: de } = await sb.from("product_ingredient").delete().in("product_id", c);
-    if (de) errors.push(`product_ingredient 정리 실패: ${de.message}`);
+  const productIdByReportNo = new Map<string, string>();
+  for (const c of chunk(productRows, 500)) {
+    const { data: ins, error: ie } = await sb.from("product").insert(c).select("id, report_no");
+    if (ie || !ins) throw new Error(`product 삽입 실패: ${ie?.message}`);
+    for (const p of ins) if (p.report_no) productIdByReportNo.set(p.report_no, p.id);
   }
+  log(`product ${productIdByReportNo.size}건 신규 삽입`);
 
-  // 5) source_snapshot + product_ingredient 배치 삽입
+  // 4) source_snapshot + product_ingredient 배치 삽입 (신규 제품만)
   const snapshots: Database["public"]["Tables"]["source_snapshot"]["Insert"][] = [];
   const ingredients: Database["public"]["Tables"]["product_ingredient"]["Insert"][] = [];
   let ingredientsLoaded = 0;
-  for (const m of loadable) {
+  for (const m of newLoadable) {
     const pid = productIdByReportNo.get(m.reportNo!);
     if (!pid) continue;
     const raw = allRecords.find((r) => r.STTEMNT_NO?.trim() === m.reportNo);
@@ -184,7 +192,7 @@ export async function runImport(
     .update({
       finished_at: new Date().toISOString(),
       total_count: allRecords.length,
-      success_count: upserted.length,
+      success_count: productIdByReportNo.size,
       error: errors.length ? { messages: errors } : null,
     })
     .eq("id", jobId);
@@ -193,7 +201,7 @@ export async function runImport(
     jobId,
     fetched: allRecords.length,
     withReportNo: loadable.length,
-    loaded: upserted.length,
+    loaded: productIdByReportNo.size,
     needsReview,
     ingredientsLoaded,
     errors,
