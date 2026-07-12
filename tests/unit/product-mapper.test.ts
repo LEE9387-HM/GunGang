@@ -9,6 +9,9 @@ import {
 const aliases: AliasMap = new Map([
   ["비타민d", { ingredientId: "vd", ingredientSlug: "vitamin-d", categorySlug: "vitamin-d" }],
   ["epa와dha의합", { ingredientId: "ed", ingredientSlug: "epa-dha", categorySlug: "omega3" }],
+  ["비타민b1", { ingredientId: "b1", ingredientSlug: "vitamin-b1", categorySlug: null }],
+  ["비타민b12", { ingredientId: "b12", ingredientSlug: "vitamin-b12", categorySlug: null }],
+  ["아연", { ingredientId: "zn", ingredientSlug: "zinc", categorySlug: "zinc" }],
 ]);
 
 describe("normalizeLabel", () => {
@@ -25,8 +28,10 @@ describe("matchIngredient", () => {
   it("부분 포함 매칭 (비타민D3 → 비타민d)", () => {
     expect(matchIngredient("비타민D3", aliases)?.ingredientSlug).toBe("vitamin-d");
   });
-  it("범위 밖 성분은 null (아연)", () => {
-    expect(matchIngredient("아연", aliases)).toBeNull();
+  it("비타민B12는 exact 매칭 (B1으로 오매칭 안 함)", () => {
+    // "비타민b1"이 "비타민b12"에 부분포함되지만 exact가 우선
+    expect(matchIngredient("비타민B12", aliases)?.ingredientSlug).toBe("vitamin-b12");
+    expect(matchIngredient("비타민B1", aliases)?.ingredientSlug).toBe("vitamin-b1");
   });
 });
 
@@ -71,9 +76,9 @@ describe("mapRecord", () => {
     expect(m.ingredients[0]).toMatchObject({ ingredientId: "ed", amountNormalized: 1200 });
   });
 
-  it("범위 밖 성분만 있는 제품 → needs_review", () => {
+  it("사전에 없는 성분만 있는 제품 → needs_review", () => {
     const m = mapRecord(
-      { PRDUCT: "아연 보충제", STTEMNT_NO: "999", BASE_STANDARD: "아연: 표시량(5mg/2,000mg)의 80~120%" },
+      { PRDUCT: "베타카로틴 보충제", STTEMNT_NO: "999", BASE_STANDARD: "베타카로틴: 표시량(0.7mg/500mg)의 80~120%" },
       aliases,
     );
     expect(m.needsReview).toBe(true);
@@ -85,5 +90,32 @@ describe("mapRecord", () => {
     const m = mapRecord({ PRDUCT: "무신고제품", BASE_STANDARD: "" }, aliases);
     expect(m.reportNo).toBeNull();
     expect(m.needsReview).toBe(true);
+  });
+
+  it("부성분(아연) 있어도 주성분(오메가3)으로 분류하되 성분은 둘 다 저장", () => {
+    const m = mapRecord(
+      {
+        PRDUCT: "오메가3 아연",
+        STTEMNT_NO: "100",
+        BASE_STANDARD:
+          "2. EPA와 DHA의 합 : 표시량(600mg/1,000mg)의 80~120% 3. 아연 : 표시량(5mg/1,000mg)의 80~120%",
+      },
+      aliases,
+    );
+    expect(m.categorySlug).toBe("omega3");
+    expect(m.ingredients).toHaveLength(2);
+  });
+
+  it("같은 성분 중복 표기는 하나로 (unique 제약 대비)", () => {
+    const m = mapRecord(
+      {
+        PRDUCT: "비타민D 중복표기",
+        STTEMNT_NO: "101",
+        BASE_STANDARD:
+          "2. 비타민D : 표시량(25μg/500mg)의 80~150% 3. 비타민D : 표시량(10μg/300mg)의 80~150%",
+      },
+      aliases,
+    );
+    expect(m.ingredients).toHaveLength(1);
   });
 });
