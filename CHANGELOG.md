@@ -15,8 +15,11 @@
   verified 제품만 노출 (RLS), SSR
 - **함량 Top 10 랭킹**: 카테고리별 핵심성분 함량 순위(단위 통일), 기준·주의 명시
 - **제조사(company) 표시**: ENTRPS 정규화(117개 업체), 검색·랭킹·상세·비교에 노출
-- **제품 비교(2~4개)**: 다나와식 나란히 비교표(제조사·함량·기준일 등),
+- **제품 비교(2~4개)**: 다나와식 나란히 비교표(제조사·함량·1일 비용·단위당 가격·기준일),
   목록 체크박스 → GET form (client JS 없음)
+- **가격·가성비**: 섭취방법 파서(parseServing), 1일 비용 + 핵심성분 100단위당 가격
+  계산(domain/dosage·pricing). `npm run price`로 수동 가격 입력(D-006).
+  가격 없으면 "준비 중" 표시
 - Vercel 배포: https://gun-gang.vercel.app
 - 원료 일일섭취량 규칙·주의사항 시드 (draft)
 - product.source_registered_at (식약처 등록일) — 근거 표시용
