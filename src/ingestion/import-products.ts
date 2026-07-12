@@ -14,6 +14,12 @@ const INGREDIENT_CATEGORY: Record<string, string> = {
   "vitamin-c": "vitamin-c",
   zinc: "zinc",
   magnesium: "magnesium",
+  ginsenoside: "red-ginseng",
+  silymarin: "milk-thistle",
+  hca: "garcinia",
+  "coenzyme-q10": "coq10",
+  "saw-palmetto": "saw-palmetto",
+  ginkgo: "ginkgo",
 };
 
 export interface ImportSummary {

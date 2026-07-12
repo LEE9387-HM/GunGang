@@ -18,6 +18,12 @@ export const CATEGORY_NAMES: Record<string, string> = {
   zinc: "아연",
   magnesium: "마그네슘",
   multivitamin: "종합비타민",
+  "red-ginseng": "홍삼",
+  "milk-thistle": "밀크씨슬",
+  garcinia: "가르시니아",
+  coq10: "코엔자임Q10",
+  "saw-palmetto": "쏘팔메토",
+  ginkgo: "은행잎추출물",
 };
 
 /** 카테고리별 랭킹 기준 단위 — 같은 단위끼리만 비교해야 순위가 유효.
@@ -30,6 +36,12 @@ export const RANKING_UNIT: Record<string, string> = {
   "vitamin-c": "mg",
   zinc: "mg",
   magnesium: "mg",
+  "red-ginseng": "mg",
+  "milk-thistle": "mg",
+  garcinia: "mg",
+  coq10: "mg",
+  "saw-palmetto": "mg",
+  ginkgo: "mg",
 };
 
 /** 카테고리별 핵심 성분 라벨 (랭킹 기준 설명용) */
@@ -41,6 +53,12 @@ export const KEY_INGREDIENT_LABEL: Record<string, string> = {
   "vitamin-c": "비타민C",
   zinc: "아연",
   magnesium: "마그네슘",
+  "red-ginseng": "진세노사이드",
+  "milk-thistle": "실리마린",
+  garcinia: "가르시니아 HCA",
+  coq10: "코엔자임Q10",
+  "saw-palmetto": "쏘팔메토 추출물",
+  ginkgo: "플라보놀배당체",
 };
 
 /** 카테고리별 형태 필터 옵션 (form_labels 값과 일치) */

@@ -14,6 +14,11 @@ const TABS = [
   { slug: "zinc", label: "아연" },
   { slug: "magnesium", label: "마그네슘" },
   { slug: "multivitamin", label: "종합비타민" },
+  { slug: "red-ginseng", label: "홍삼" },
+  { slug: "milk-thistle", label: "밀크씨슬" },
+  { slug: "garcinia", label: "가르시니아" },
+  { slug: "coq10", label: "코엔자임Q10" },
+  { slug: "ginkgo", label: "은행잎" },
 ] as const;
 
 export function CategoryTabs({ current = "", sort }: { current?: string; sort?: string }) {
