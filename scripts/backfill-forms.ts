@@ -21,6 +21,7 @@ async function main() {
         "id, is_key_functional, product:product_id!inner(name, category:category_id(slug), source_snapshot(raw))",
       )
       .eq("is_key_functional", true)
+      .order("id") // 정렬 없으면 range 페이지 간 순서 불안정 → 누락·중복
       .range(from, from + pageSize - 1);
     if (error) throw new Error(`조회 실패: ${error.message}`);
     const rows = (data ?? []) as unknown as Array<{
