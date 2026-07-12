@@ -186,6 +186,38 @@ export type Database = {
         }
         Relationships: []
       }
+      company_alias: {
+        Row: {
+          alias: string
+          alias_normalized: string
+          company_id: string
+          id: string
+          source: string | null
+        }
+        Insert: {
+          alias: string
+          alias_normalized: string
+          company_id: string
+          id?: string
+          source?: string | null
+        }
+        Update: {
+          alias?: string
+          alias_normalized?: string
+          company_id?: string
+          id?: string
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_alias_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evidence_source: {
         Row: {
           id: string

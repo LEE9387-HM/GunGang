@@ -202,13 +202,22 @@ export async function searchProducts(opts: {
 
   const q = opts.q?.trim();
   if (q) {
-    // 제품명 OR 제조사명 매칭. 제조사명은 부분일치(휴온스→휴온스엔·(주)휴온스 등)로 company_id를 먼저 찾는다.
-    const { data: comps } = await sb
-      .from("company")
-      .select("id")
-      .ilike("name", `%${q}%`)
-      .limit(200);
-    const companyIds = (comps ?? []).map((c) => c.id);
+    // 제품명 OR 제조사명 매칭.
+    // 제조사는 (a) 한글명 부분일치(휴온스→휴온스엔), (b) 영문 별칭(Huons→휴온스엔)으로 company_id를 찾는다.
+    const [byName, byAlias] = await Promise.all([
+      sb.from("company").select("id").ilike("name", `%${q}%`).limit(200),
+      sb
+        .from("company_alias")
+        .select("company_id")
+        .ilike("alias_normalized", `%${q.toLowerCase()}%`)
+        .limit(200),
+    ]);
+    const companyIds = [
+      ...new Set([
+        ...(byName.data ?? []).map((c) => c.id),
+        ...(byAlias.data ?? []).map((a) => a.company_id),
+      ]),
+    ];
     query = companyIds.length
       ? query.or(`name.ilike.%${q}%,company_id.in.(${companyIds.join(",")})`)
       : query.ilike("name", `%${q}%`);
