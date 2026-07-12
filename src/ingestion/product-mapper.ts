@@ -75,7 +75,7 @@ export function normalizeLabel(label: string): string {
  * 주기능 성분이 따로 있으면 이들은 카테고리 판정에서 무시한다.
  * 예: 쏘팔메토(로르산)+아연 → 쏘팔메토, 콜라겐+비타민C → 콜라겐.
  */
-const MINOR_CATEGORIES = new Set(["vitamin-c", "zinc", "magnesium"]);
+const MINOR_CATEGORIES = new Set(["vitamin-c", "zinc", "magnesium", "vitamin-d"]);
 
 /**
  * 매칭된 성분들의 카테고리 목록에서 제품 카테고리를 결정한다 (순수 함수).

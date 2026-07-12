@@ -27,6 +27,10 @@ export const CATEGORY_NAMES: Record<string, string> = {
   collagen: "콜라겐",
   propolis: "프로폴리스",
   gla: "감마리놀렌산",
+  joint: "관절건강",
+  arginine: "아르기닌",
+  cranberry: "크랜베리",
+  "hyaluronic-acid": "히알루론산",
 };
 
 /** 카테고리별 랭킹 기준 단위 — 같은 단위끼리만 비교해야 순위가 유효.
@@ -48,6 +52,10 @@ export const RANKING_UNIT: Record<string, string> = {
   collagen: "mg",
   propolis: "mg",
   gla: "mg",
+  joint: "mg",
+  arginine: "mg",
+  cranberry: "mg",
+  "hyaluronic-acid": "mg",
 };
 
 /** 카테고리별 핵심 성분 라벨 (랭킹 기준 설명용) */
@@ -68,6 +76,10 @@ export const KEY_INGREDIENT_LABEL: Record<string, string> = {
   collagen: "콜라겐펩타이드",
   propolis: "프로폴리스",
   gla: "감마리놀렌산",
+  joint: "관절 기능성분",
+  arginine: "L-아르기닌",
+  cranberry: "크랜베리 추출물",
+  "hyaluronic-acid": "히알루론산",
 };
 
 /** 카테고리별 형태 필터 옵션 (form_labels 값과 일치) */

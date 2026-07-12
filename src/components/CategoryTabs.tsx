@@ -22,6 +22,8 @@ const TABS = [
   { slug: "saw-palmetto", label: "쏘팔메토" },
   { slug: "propolis", label: "프로폴리스" },
   { slug: "gla", label: "감마리놀렌산" },
+  { slug: "joint", label: "관절건강" },
+  { slug: "hyaluronic-acid", label: "히알루론산" },
 ] as const;
 
 export function CategoryTabs({ current = "", sort }: { current?: string; sort?: string }) {

@@ -23,6 +23,13 @@ const INGREDIENT_CATEGORY: Record<string, string> = {
   collagen: "collagen",
   propolis: "propolis",
   gla: "gla",
+  glucosamine: "joint",
+  chondroitin: "joint",
+  msm: "joint",
+  boswellia: "joint",
+  "l-arginine": "arginine",
+  cranberry: "cranberry",
+  "hyaluronic-acid": "hyaluronic-acid",
 };
 
 export interface ImportSummary {
