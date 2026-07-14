@@ -17,7 +17,8 @@
     "verify": "tsx --env-file=.env scripts/run-verify.ts",
     "price": "tsx --env-file=.env scripts/add-price.ts",
     "backfill:forms": "tsx --env-file=.env scripts/backfill-forms.ts",
-    "reparse": "tsx --env-file=.env scripts/reparse.ts"
+    "reparse": "tsx --env-file=.env scripts/reparse.ts",
+    "poc:price": "tsx --env-file=.env scripts/poc-naver-price.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.0",
