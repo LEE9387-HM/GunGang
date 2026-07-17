@@ -96,7 +96,8 @@ async function main() {
       none += 1;
       continue;
     }
-    let best: "high" | "mid" | "low" = "low";
+    const RANK = { low: 0, mid: 1, high: 2 } as const;
+    let bestRank = 0;
     items.slice(0, 3).forEach((it, i) => {
       const cand: ShopCandidate = {
         title: it.title,
@@ -108,8 +109,7 @@ async function main() {
         productType: Number(it.productType),
       };
       const j = judgeCandidate(t.name, cand);
-      if (j.confidence === "high" && best !== "high") best = "high";
-      else if (j.confidence === "mid" && best === "low") best = "mid";
+      bestRank = Math.max(bestRank, RANK[j.confidence]);
       console.log(
         `   ${i + 1}. [${j.confidence.toUpperCase()} ${(j.score * 100).toFixed(0)}%] ${stripHtml(it.title).slice(0, 60)}`,
       );
@@ -117,8 +117,8 @@ async function main() {
         `      ${Number(it.lprice).toLocaleString()}원 · ${it.mallName} · brand=${it.brand || "-"} maker=${it.maker || "-"} · ${j.reasons.join(" / ")}`,
       );
     });
-    if (best === "high") high += 1;
-    else if (best === "mid") mid += 1;
+    if (bestRank === 2) high += 1;
+    else if (bestRank === 1) mid += 1;
     else none += 1;
     console.log("");
     await new Promise((r) => setTimeout(r, 250)); // 예의상 간격
