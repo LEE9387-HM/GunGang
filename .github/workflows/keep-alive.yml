@@ -1,0 +1,21 @@
+name: Supabase Keep-Alive
+
+# 무료 티어 Supabase는 7일 미사용 시 자동 정지(INACTIVE)된다.
+# 정지되면 배포 사이트가 전 카테고리 빈 목록("Top 0")으로 보임 (코드 회귀 아님, DB 정지).
+# 2일 주기로 가벼운 읽기 쿼리를 날려 "미사용" 상태에 들어가지 않게 한다.
+on:
+  schedule:
+    - cron: "17 3 */2 * *" # 매 2일 03:17 UTC (KST 12:17)
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping public table (RLS 공개 읽기)
+        run: |
+          curl -sf \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/category?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -o /dev/null -w "HTTP %{http_code}\n"
