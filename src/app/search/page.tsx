@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FormBadges } from "@/components/FormBadges";
 import { SearchBar } from "@/components/SearchBar";
+import { hasGuide } from "@/content/guides";
 import {
   searchProducts,
   getCategoryRanking,
@@ -87,9 +88,17 @@ export default async function SearchPage({
       </div>
 
       {categoryLabel && (
-        <p className="mt-4 text-sm">
+        <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
           <span className="font-semibold">{categoryLabel}</span>
-          <Link href="/" className="ml-2 text-xs text-gray-400 hover:underline">
+          {category && hasGuide(category) && (
+            <Link
+              href={`/guide/${category}`}
+              className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+            >
+              📖 {categoryLabel} 고르는 법
+            </Link>
+          )}
+          <Link href="/" className="text-xs text-gray-400 hover:underline">
             카테고리 변경
           </Link>
         </p>

@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { SearchBar } from "@/components/SearchBar";
+import { GUIDES } from "@/content/guides";
 import {
   CATEGORY_GROUPS,
   CATEGORY_NAMES,
   categoryHref,
   hasRanking,
 } from "@/server/services/product-service";
+
+const guides = Object.values(GUIDES);
 
 export default function Home() {
   return (
@@ -44,6 +47,23 @@ export default function Home() {
           </div>
         ))}
       </section>
+
+      {guides.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xs font-semibold text-gray-500">구매가이드</h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {guides.map((g) => (
+              <Link
+                key={g.slug}
+                href={`/guide/${g.slug}`}
+                className="inline-flex items-center gap-1 rounded-full border border-blue-300 px-3.5 py-1.5 text-sm text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-950/40"
+              >
+                📖 {g.title}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <p className="mt-10 text-xs text-gray-500">
         데이터 출처: 식품의약품안전처 건강기능식품정보. 검수 완료된 제품만 표시됩니다.
