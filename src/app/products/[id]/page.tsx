@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Disclaimer } from "@/components/Disclaimer";
 import { FormBadges } from "@/components/FormBadges";
+import { PriceSearchLink } from "@/components/PriceSearchLink";
 import {
   getProductDetail,
   getProductPricing,
@@ -131,10 +132,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           </div>
         ) : (
           <p className="mt-2 text-xs text-gray-400">
-            가격 정보 준비 중입니다. (수집된 가격이 등록되면 1일 비용과 성분 단위당 가격이
-            표시됩니다.)
+            GunGang은 실시간 판매가를 수집하지 않습니다. 아래에서 현재 최저가를 확인하세요.
           </p>
         )}
+        <div className="mt-4">
+          <PriceSearchLink productName={p.name} />
+        </div>
       </section>
 
       <section className="mt-6 rounded-lg bg-gray-50 px-4 py-3 text-xs text-gray-600 dark:bg-gray-900 dark:text-gray-400">

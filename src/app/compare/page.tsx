@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Disclaimer } from "@/components/Disclaimer";
+import { PriceSearchLink } from "@/components/PriceSearchLink";
 import {
   compareProducts,
   getProductPricing,
@@ -107,6 +108,14 @@ export default async function ComparePage({
                   )}
                   emphasize
                 />
+                <tr className="border-b border-gray-100 dark:border-gray-900">
+                  <td className="p-2 align-top text-xs text-gray-500">최저가</td>
+                  {products.map((p) => (
+                    <td key={p.id} className="p-2 align-top">
+                      <PriceSearchLink productName={p.name} compact />
+                    </td>
+                  ))}
+                </tr>
                 <Row label="신고번호" cells={products.map((p) => p.reportNo ?? "-")} />
                 <Row
                   label="정보 기준일"
