@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { SearchBar } from "@/components/SearchBar";
 import { GUIDES } from "@/content/guides";
+import { createServerAuthClient } from "@/infra/db/server-auth-client";
+import { getSessionUser, isAdmin } from "@/server/services/auth-service";
 import {
   CATEGORY_GROUPS,
   CATEGORY_NAMES,
@@ -8,12 +10,42 @@ import {
   hasRanking,
 } from "@/server/services/product-service";
 
+export const dynamic = "force-dynamic";
+
 const guides = Object.values(GUIDES);
 
-export default function Home() {
+export default async function Home() {
+  const sb = await createServerAuthClient();
+  const user = await getSessionUser(sb);
+  const admin = user ? await isAdmin(sb) : false;
+
   return (
     <main className="mx-auto max-w-2xl px-5 py-16">
-      <h1 className="text-3xl font-bold tracking-tight">GunGang</h1>
+      <div className="flex items-center justify-end gap-3 text-sm">
+        {user ? (
+          <>
+            <Link href="/mypage" className="text-gray-500 hover:underline">
+              내 영양제
+            </Link>
+            {admin && (
+              <Link href="/admin" className="text-gray-500 hover:underline">
+                관리자
+              </Link>
+            )}
+          </>
+        ) : (
+          <>
+            <Link href="/login" className="text-gray-500 hover:underline">
+              로그인
+            </Link>
+            <Link href="/signup" className="text-gray-500 hover:underline">
+              회원가입
+            </Link>
+          </>
+        )}
+      </div>
+
+      <h1 className="mt-4 text-3xl font-bold tracking-tight">GunGang</h1>
       <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
         건강기능식품의 성분·실제 함량·가격을 <strong>근거와 함께</strong> 비교합니다.
         추천이 아니라 스스로 판단할 정보를 제공합니다.

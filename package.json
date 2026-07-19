@@ -18,9 +18,11 @@
     "price": "tsx --env-file=.env scripts/add-price.ts",
     "backfill:forms": "tsx --env-file=.env scripts/backfill-forms.ts",
     "reparse": "tsx --env-file=.env scripts/reparse.ts",
-    "poc:price": "tsx --env-file=.env scripts/poc-naver-price.ts"
+    "poc:price": "tsx --env-file=.env scripts/poc-naver-price.ts",
+    "admin:create": "tsx --env-file=.env scripts/create-admin.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.47.0",
     "next": "^15.3.0",
     "react": "^19.0.0",
