@@ -10,6 +10,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -27,13 +28,17 @@ export default function SignupPage() {
       setError("비밀번호가 일치하지 않습니다.");
       return;
     }
+    if (!agreed) {
+      setError("이용약관 및 개인정보처리방침에 동의해야 가입할 수 있습니다.");
+      return;
+    }
 
     setLoading(true);
     const sb = createBrowserAuthClient();
     const { data, error: signUpError } = await sb.auth.signUp({ email, password });
-    setLoading(false);
 
     if (signUpError) {
+      setLoading(false);
       setError(
         signUpError.message.includes("already registered")
           ? "이미 가입된 이메일입니다."
@@ -42,12 +47,21 @@ export default function SignupPage() {
       return;
     }
 
-    if (data.session) {
+    if (data.session && data.user) {
+      // 이메일 확인이 없는 프로젝트 설정이면 가입과 동시에 세션이 생기므로 바로 기록
+      await sb
+        .from("user_consent")
+        .upsert(
+          { user_id: data.user.id, kind: "terms_privacy" },
+          { onConflict: "user_id,kind", ignoreDuplicates: true },
+        );
+      setLoading(false);
       router.replace("/mypage");
       router.refresh();
       return;
     }
-    // 이메일 확인이 필요한 프로젝트 설정인 경우
+    setLoading(false);
+    // 이메일 확인이 필요한 프로젝트 설정인 경우 — 동의 기록은 최초 로그인 시점에 처리(/login)
     setNotice("가입 확인 이메일을 보냈습니다. 메일함을 확인한 뒤 로그인해주세요.");
   }
 
@@ -105,6 +119,26 @@ export default function SignupPage() {
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
           />
         </div>
+
+        <label className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <input
+            type="checkbox"
+            required
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0"
+          />
+          <span>
+            <Link href="/terms" target="_blank" className="text-blue-600 hover:underline dark:text-blue-400">
+              이용약관
+            </Link>{" "}
+            및{" "}
+            <Link href="/privacy" target="_blank" className="text-blue-600 hover:underline dark:text-blue-400">
+              개인정보처리방침
+            </Link>
+            에 동의합니다 (필수)
+          </span>
+        </label>
 
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
         {notice && <p className="text-sm text-green-700 dark:text-green-400">{notice}</p>}

@@ -847,6 +847,27 @@ export type Database = {
           },
         ]
       }
+      user_consent: {
+        Row: {
+          agreed_at: string
+          id: string
+          kind: string
+          user_id: string
+        }
+        Insert: {
+          agreed_at?: string
+          id?: string
+          kind: string
+          user_id: string
+        }
+        Update: {
+          agreed_at?: string
+          id?: string
+          kind?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_supplement: {
         Row: {
           created_at: string
@@ -887,6 +908,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_own_account: { Args: never; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

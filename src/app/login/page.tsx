@@ -26,11 +26,20 @@ function LoginForm() {
     setError(null);
     setLoading(true);
     const sb = createBrowserAuthClient();
-    const { error: signInError } = await sb.auth.signInWithPassword({ email, password });
+    const { data, error: signInError } = await sb.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (signInError) {
       setError("이메일 또는 비밀번호가 올바르지 않습니다.");
       return;
+    }
+    // 회원가입 시 이메일 확인 대기로 즉시 기록 못했을 경우를 대비해 최초 로그인 시점에 upsert
+    if (data.user) {
+      await sb
+        .from("user_consent")
+        .upsert(
+          { user_id: data.user.id, kind: "terms_privacy" },
+          { onConflict: "user_id,kind", ignoreDuplicates: true },
+        );
     }
     router.replace(searchParams.get("next") ?? "/mypage");
     router.refresh();
