@@ -17,10 +17,14 @@ function formatAmount(amount: number | null, unit: string | null): string {
   return `${amount.toLocaleString()}${unit}`;
 }
 
-/** 체크 후 비교/중복분석으로 보내는 플로팅 버튼 (formaction으로 대상 분기, JS 불필요) */
+/**
+ * 체크 후 비교/중복분석으로 보내는 플로팅 버튼 (formaction으로 대상 분기, JS 불필요).
+ * 부모 <form>에 group 클래스가 필요 — group-has-[:checked]로 체크된 항목이 있을 때만
+ * 노출한다. 상시 노출 시 아무것도 선택 안 해도 리스트 하단 항목을 가리는 문제가 있었다.
+ */
 function SelectionActions() {
   return (
-    <div className="fixed bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+    <div className="fixed bottom-5 left-1/2 z-10 hidden -translate-x-1/2 gap-2 group-has-[:checked]:flex">
       <button
         type="submit"
         formAction="/compare"
@@ -169,7 +173,7 @@ async function Ranking({
         </p>
       )}
 
-      <form action="/compare">
+      <form action="/compare" className="group">
         <ol className="mt-4 space-y-2">
           {ranked.map((p) => (
             <li
@@ -234,7 +238,7 @@ async function Results({
           검색 결과가 없습니다. 다른 제품명이나 카테고리로 시도해 보세요.
         </p>
       ) : (
-        <form action="/compare">
+        <form action="/compare" className="group">
           <ul className="mt-4 divide-y divide-gray-200 dark:divide-gray-800">
             {results.map((p) => (
               <li key={p.id} className="flex items-center gap-3 py-3.5">
