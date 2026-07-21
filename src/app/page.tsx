@@ -59,7 +59,7 @@ export default async function Home() {
       <section className="mt-8 space-y-5">
         {CATEGORY_GROUPS.map((g) => (
           <div key={g.name}>
-            <h2 className="text-xs font-semibold text-gray-500">{g.name}</h2>
+            <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300">{g.name}</h2>
             <div className="mt-2 flex flex-wrap gap-2">
               {g.slugs.map((slug) => (
                 <Link
@@ -82,7 +82,7 @@ export default async function Home() {
 
       {guides.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-xs font-semibold text-gray-500">구매가이드</h2>
+          <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300">구매가이드</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {guides.map((g) => (
               <Link
